@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Commandes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Mes Commandes</h1>
+        <a href="./index.html" style="color: aliceblue;">ACCEUIL</a>
+    </header>
+    <main>
+        <h2>Suivi de vos commandes</h2>
+       
+
+        <!-- Filtres -->
+        <div class="filters">
+            <label for="filter-date">Date :</label>
+            <input type="date" id="filter-date">
+            
+            <label for="filter-status">Statut :</label>
+            <select id="filter-status">
+                <option value="">Tous</option>
+                <option value="Accepté">Accepté</option>
+                <option value="livré">Livré</option>
+                <option value="annulé">Annulé</option>
+            </select>
+        </div>
+
+        <div id="orders-list">
+            <p>Chargement de vos commandes...</p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 GRAND TACOS - Tous droits réservés.</p>
+    </footer>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdp0QPxkC2TSpd5zVComDmxNOlZy5jSt0",
+            authDomain: "mariajob01.firebaseapp.com",
+            databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
+            projectId: "mariajob01",
+            storageBucket: "mariajob01.firebasestorage.app",
+            messagingSenderId: "253374710047",
+            appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
+            measurementId: "G-79642QZTTM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ordersList = document.getElementById('orders-list');
+            const filterDate = document.getElementById('filter-date');
+            const filterStatus = document.getElementById('filter-status');
+            const clientPhone = prompt("Veuillez saisir votre numéro de téléphone pour consulter vos commandes :");
+
+            if (!clientPhone) {
+                ordersList.innerHTML = "<p>Numéro de téléphone requis pour afficher les commandes.</p>";
+                return;
+            }
+
+            const renderOrders = (snapshot) => {
+                ordersList.innerHTML = ""; // Efface le contenu précédent
+                let hasOrders = false;
+
+                snapshot.forEach((childSnapshot) => {
+                    const order = childSnapshot.val();
+                    if (order.clientPhone === clientPhone) {
+                        const orderDate = new Date(order.timestamp);
+                        const filterDateValue = filterDate.value ? new Date(filterDate.value) : null;
+                        const filterStatusValue = filterStatus.value;
+
+                        // Filtrer par date
+                        if (filterDateValue && orderDate.toDateString() !== filterDateValue.toDateString()) {
+                            return;
+                        }
+
+                        // Filtrer par statut
+                        if (filterStatusValue && order.orderStatus !== filterStatusValue) {
+                            return;
+                        }
+
+                        hasOrders = true;
+                        const orderDiv = document.createElement('div');
+                        orderDiv.className = "order";
+
+                        let tacosDetails = "";
+                        if (order.tacos && Array.isArray(order.tacos)) {
+                            order.tacos.forEach(taco => {
+                                tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        orderDiv.innerHTML = `
+                            <p><strong>Date :</strong> ${orderDate.toLocaleString()}</p>
+                            <p><strong>Adresse :</strong> ${order.clientAddress}</p>
+                            ${tacosDetails}
+                            <p><strong>Total :</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
+                            <p><strong>Statut :</strong> ${order.orderStatus}</p>
+                        `;
+                        ordersList.appendChild(orderDiv);
+                    }
+                });
+
+                if (!hasOrders) {
+                    ordersList.innerHTML = "<p>Aucune commande trouvée avec les critères sélectionnés.</p>";
+                }
+            };
+
+            // Charger les commandes initialement
+            onValue(ref(db, 'orders'), (snapshot) => {
+                renderOrders(snapshot);
+            });
+
+            // Ajouter des événements aux filtres
+            filterDate.addEventListener('input', () => {
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    renderOrders(snapshot);
+                });
+            });
+
+            filterStatus.addEventListener('change', () => {
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    renderOrders(snapshot);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
