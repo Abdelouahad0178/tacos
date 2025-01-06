@@ -102,6 +102,7 @@
                             ${tacosDetails}
                             <p><strong>Total :</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                             <p><strong>Statut :</strong> ${order.orderStatus}</p>
+                            <p><strong>Livreur :</strong> ${order.commercialPhone || 'Non attribué'}</p>
                         `;
                         ordersList.appendChild(orderDiv);
                     }

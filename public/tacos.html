@@ -22,13 +22,20 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Liste des commerciaux
+        const commerciaux = [
+            { name: "Livreur 1", phone: "0612345678" },
+            { name: "Livreur 2", phone: "0623456789" },
+            { name: "Livreur 3", phone: "0634567890" }
+        ];
+
         document.addEventListener('DOMContentLoaded', () => {
             const ordersContainer = document.getElementById('orders-container');
             const summaryContainer = document.getElementById('summary-container');
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
             const today = new Date();
-            let lastOrderCount = 0; // For detecting new orders
+            let lastOrderCount = 0; // Pour détecter les nouvelles commandes
 
             const formatDate = (date) => {
                 const yyyy = date.getFullYear();
@@ -41,15 +48,15 @@
             startDateInput.value = todayString;
             endDateInput.value = todayString;
 
-            // Play a beep sound
+            // Jouer un son de bip
             const playBeep = () => {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
-                oscillator.type = 'sine'; // Sound wave type
-                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Frequency in Hz
+                oscillator.type = 'sine'; // Type d'onde sonore
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Fréquence en Hz
                 oscillator.connect(audioContext.destination);
                 oscillator.start();
-                setTimeout(() => oscillator.stop(), 500); // Stop after 500ms
+                setTimeout(() => oscillator.stop(), 500); // Arrêter après 500ms
             };
 
             const loadOrders = () => {
@@ -58,7 +65,7 @@
                 const endTime = new Date(endDateInput.value).setHours(23, 59, 59, 999);
 
                 onValue(ref(db, 'orders'), (snapshot) => {
-                    ordersContainer.innerHTML = ''; // Clear orders to prevent duplication
+                    ordersContainer.innerHTML = ''; // Effacer les commandes pour éviter les doublons
                     let orderCount = 0;
 
                     snapshot.forEach((childSnapshot) => {
@@ -88,11 +95,18 @@
                                     <label><input type="radio" name="status-${childSnapshot.key}" value="livré" ${order.orderStatus === 'livré' ? 'checked' : ''}> Livré</label>
                                     <label><input type="radio" name="status-${childSnapshot.key}" value="annulé" ${order.orderStatus === 'annulé' ? 'checked' : ''}> Annulé</label>
                                 </p>
+                                <p><strong>Livreur:</strong>
+                                    <select class="commercial-select" data-id="${childSnapshot.key}">
+                                        ${commerciaux.map(com => `
+                                            <option value="${com.phone}" ${order.commercialPhone === com.phone ? 'selected' : ''}>${com.name}</option>
+                                        `).join('')}
+                                    </select>
+                                </p>
                                 <button class="delete-btn" data-id="${childSnapshot.key}">Supprimer</button>
                             `;
                             ordersContainer.appendChild(div);
 
-                            // Auto-update on radio change
+                            // Mise à jour automatique du statut
                             div.querySelectorAll(`input[name="status-${childSnapshot.key}"]`).forEach(radio => {
                                 radio.addEventListener('change', () => {
                                     const newStatus = document.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
@@ -102,6 +116,15 @@
                                             updateSalesSummary();
                                         });
                                 });
+                            });
+
+                            // Mise à jour du commercial sélectionné
+                            div.querySelector('.commercial-select').addEventListener('change', (e) => {
+                                const commercialPhone = e.target.value;
+                                update(ref(db, `orders/${childSnapshot.key}`), { commercialPhone })
+                                    .then(() => {
+                                        console.log('Livreur mis à jour');
+                                    });
                             });
 
                             // Supprimer la commande
@@ -121,9 +144,9 @@
                         }
                     });
 
-                    // Check for new orders
+                    // Vérifier les nouvelles commandes
                     if (orderCount > lastOrderCount) {
-                        playBeep(); // Play a beep sound
+                        playBeep(); // Jouer un son de bip
                     }
                     lastOrderCount = orderCount;
                 });
@@ -177,7 +200,7 @@
                 updateSalesSummary();
             });
 
-            // Initial load
+            // Chargement initial
             loadOrders();
             updateSalesSummary();
         });
@@ -227,7 +250,6 @@
             border: 1px solid #ddd;
             padding: 0.5rem;
             text-align: left;
-            
         }
 
         .sales-summary th {
@@ -239,7 +261,6 @@
         .filters {
             text-align: center;
             margin: 1rem 0;
-            
         }
 
         .filters input {
@@ -315,54 +336,50 @@
         <h2>Résumé des Ventes</h2>
         <div id="summary-container"></div>
     </main>
-   
+
     <footer>
         <p>&copy; 2024 GRAND TACOS - Tous droits réservés.</p>
         <p>
-            Suivez-nous sur : 
+            Suivez-nous sur :
             <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
             <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
             <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
         </p>
     </footer>
     <style>
-    footer {
-        background-color: #ff5722;
-    color: #fff;
-    text-align: center;
-    padding: 20px 10px;
-    font-family: 'Arial', sans-serif;
-    font-size: 18px;
-}
+        footer {
+            background-color: #ff5722;
+            color: #fff;
+            text-align: center;
+            padding: 20px 10px;
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+        }
 
-footer p {
-    margin: 10px 0;
-}
+        footer p {
+            margin: 10px 0;
+        }
 
-footer a {
-    color: #fff;
-    margin: 0 10px;
-    text-decoration: none;
-    font-size: 18px;
-    transition: color 0.3s ease;
-}
+        footer a {
+            color: #fff;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
 
-footer a:hover {
-    color: #ff5733;
-}
+        footer a:hover {
+            color: #ff5733;
+        }
 
-footer a i {
-    vertical-align: middle;
-}
+        footer a i {
+            vertical-align: middle;
+        }
 
-footer p:last-child {
-    margin-top: 15px;
-    font-size: 16px;
-}
-
+        footer p:last-child {
+            margin-top: 15px;
+            font-size: 16px;
+        }
     </style>
-
-
-
 </body>
 </html>

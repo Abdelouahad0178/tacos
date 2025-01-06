@@ -132,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tacos,
             total,
             orderStatus: "En traitement",
-            timestamp: new Date().getTime() // Stocker le timestamp
+            timestamp: new Date().getTime(), // Stocker le timestamp
+            commercialPhone: "" // Numéro de téléphone du livreur (vide par défaut)
         };
 
         // Envoi de la commande à Firebase
