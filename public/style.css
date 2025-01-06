@@ -5,6 +5,8 @@ body {
     padding: 0;
     background-color: #f9f9f9;
     color: #333;
+    overflow: visible;
+    /* S'assurer que tout le contenu est visible */
 }
 
 /* Header */
@@ -40,6 +42,67 @@ header .contact-info a {
 header .contact-info a:hover {
     text-decoration: underline;
 }
+
+
+
+
+/* Style du statut d'ouverture */
+#status-display {
+    position: fixed;
+    top: 0px;
+    /* En haut de la page */
+    right: 20px;
+    /* Décalage depuis la droite */
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #ff5722;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 5px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Ajuste la position du total et du statut */
+#total-display-header {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #ff5722;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    /* Moins élevé que l'horaire */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Slider */
 .slider {
@@ -102,7 +165,8 @@ label {
     font-weight: bold;
 }
 
-input, textarea {
+input,
+textarea {
     margin-bottom: 20px;
     padding: 10px;
     border: 1px solid #ddd;
@@ -184,14 +248,16 @@ footer p:last-child {
 
 /* Modale */
 .modal {
-    display: none; /* Cacher par défaut */
+    display: none;
+    /* Cacher par défaut */
     position: fixed;
     z-index: 1000;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Fond semi-transparent */
     justify-content: center;
     align-items: center;
 }
@@ -299,23 +365,44 @@ footer p:last-child {
 /* Total à payer en haut à droite */
 #total-display-header {
     position: fixed;
-    top: 20px;
+    top: 38px;
+    /* Décalage depuis le haut de la page */
     right: 20px;
-    background-color: rgba(255, 255, 255, 0.8); /* Fond clair */
-    color: #ff5722; /* Couleur contrastée */
+    /* Décalage depuis la droite */
+    background-color: rgba(255, 255, 255, 0.8);
+    /* Fond légèrement transparent */
+    color: #ff5722;
+    /* Couleur contrastée */
     font-size: 1.2rem;
     font-weight: bold;
     padding: 10px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000; /* S'assurer qu'il soit au-dessus de tout autre contenu */
+    z-index: 1000;
+    /* Assurer que le total soit toujours visible au-dessus des autres éléments */
 }
 
-/* Ajuster la taille du total lorsqu'il est visible */
+/* Ajuster la taille du total lorsqu'il est visible sur mobile */
 @media (max-width: 768px) {
     #total-display-header {
-        font-size: 1rem;
-        top: 10px;
+        font-size: 12px;
+        top: 37px;
         right: 10px;
     }
+}
+
+/* Style de l'élément de statut */
+#status-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#status-icon {
+    font-size: 1.5rem;
+}
+
+#status-text {
+    font-size: 1rem;
+    font-weight: bold;
 }

@@ -18,22 +18,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Données des tacos pour la modale
-const tacosDetails = [
-    { title: "Tacos Classique", description: "Un tacos délicieux avec une garniture classique qui ravira vos papilles.", image: "images/TacosClassic.png" },
-    { title: "Tacos Géant", description: "Un tacos géant pour les grands appétits, garni de viandes savoureuses.", image: "images/TacosGeant.png" },
-    { title: "Tacos Végétarien", description: "Un choix sain et savoureux, rempli de légumes frais et de fromage.", image: "images/TacosVegetal.png" },
-    { title: "Tacos Spécial", description: "Notre spécialité maison avec des épices uniques et des ingrédients premium.", image: "images/TacosSpecial.png" },
-    { title: "Tacos Mexico", description: "Inspiré de la cuisine mexicaine, ce tacos vous transporte directement au Mexique.", image: "images/tacosmexico.png" },
-    { title: "Pizza Margherita", description: "Inspiré de la cuisine italienne, cette Pizza vous transporte directement en Italie.", image: "images/PizzaMargherita.jpg" }
-];
+// Détails des tacos pour la modale
+const tacosDetails = {
+    "Classique": { description: "Un tacos classique délicieux.", image: "images/TacosClassic.png" },
+    "Géant": { description: "Un tacos géant pour les grands appétits.", image: "images/TacosGeant.png" },
+    "Végétarien": { description: "Un tacos végétarien sain et savoureux.", image: "images/TacosVegetal.png" },
+    "Spécial": { description: "Notre spécialité avec des ingrédients premium.", image: "images/TacosSpecial.png" },
+    "Mexico": { description: "Un tacos inspiré de la cuisine mexicaine.", image: "images/tacosmexico.png" },
+    "Margherita": { description: "Une pizza Margherita à l'italienne.", image: "images/PizzaMargherita.jpg" }
+};
 
 // Fonction d'ouverture de la modale
-const openModal = (title, description, imageSrc) => {
-    document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-description').textContent = description;
-    document.getElementById('modal-image').src = imageSrc;
-    document.getElementById('modal').style.display = 'flex';
+const openModal = (category) => {
+    const details = tacosDetails[category];
+    if (details) {
+        document.getElementById('modal-title').textContent = category;
+        document.getElementById('modal-description').textContent = details.description;
+        document.getElementById('modal-image').src = details.image;
+        document.getElementById('modal').style.display = 'flex';
+    }
 };
 
 // Fonction pour calculer le total
@@ -66,18 +69,16 @@ const sendOrderToFirebase = (orderData) => {
 // DOMContentLoaded pour gérer les événements
 document.addEventListener('DOMContentLoaded', () => {
     // Gestion du slider
-    const slides = document.querySelectorAll('.slide img');
+    const slides = document.querySelectorAll('.slide');
     const modal = document.getElementById('modal');
     const closeBtn = document.querySelector('.close-btn');
     const orderForm = document.getElementById('new-order-form');
-    const tacosCategories = document.getElementById('tacos-categories');
-    const totalDisplay = document.getElementById('total-display');
 
     // Afficher la modale lorsqu'une image est cliquée
-    slides.forEach((slide, index) => {
+    slides.forEach(slide => {
         slide.addEventListener('click', () => {
-            const taco = tacosDetails[index];
-            openModal(taco.title, taco.description, taco.image);
+            const category = slide.dataset.category;
+            openModal(category);
         });
     });
 
@@ -85,6 +86,19 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn.addEventListener('click', () => modal.style.display = 'none');
     window.addEventListener('click', (e) => {
         if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Ajout d'une unité au clic sur les images dans le formulaire
+    const tacosImages = document.querySelectorAll('#tacos-categories img');
+    tacosImages.forEach(img => {
+        img.addEventListener('click', (e) => {
+            const category = e.target.alt;
+            const input = document.querySelector(`.tacos-quantity[data-category="${category}"]`);
+            if (input) {
+                input.value = parseInt(input.value || "0", 10) + 1;
+                input.dispatchEvent(new Event('input')); // Met à jour le total
+            }
+        });
     });
 
     // Calcul et mise à jour du total lors de la modification des quantités
@@ -99,10 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const clientName = document.getElementById('client-name').value || '';
         const clientPhone = document.getElementById('client-phone').value || '';
         const clientAddress = document.getElementById('client-address').value || '';
-        const orderDetails = document.getElementById('order-details')?.value || '';
-        const orderStatus = "En traitement";
-        let total = 0;
         const tacos = [];
+        let total = 0;
 
         document.querySelectorAll('.tacos-quantity').forEach(input => {
             const category = input.dataset.category;
@@ -113,20 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const now = new Date();
-        const dateTime = now.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-
-        // Structure des données de la commande
         const orderData = {
             clientName,
             clientPhone,
             clientAddress,
             tacos,
-            orderDetails,
-            orderStatus,
             total,
-            dateTime,
-            timestamp: now.getTime()
+            orderStatus: "En traitement",
+            timestamp: new Date().getTime() // Stocker le timestamp
         };
 
         // Envoi de la commande à Firebase
@@ -134,19 +140,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Réinitialisation du formulaire et du total
         orderForm.reset();
-        totalDisplay.textContent = "Total à payer : 0 DHS";
+        updateTotal();
     });
 
     // Fonction de défilement automatique du slider
     let index = 0;
     const slideShow = () => {
-        const slides = document.querySelector('.slides');
-        const totalSlides = slides.children.length;
-        index = (index + 1) % totalSlides;  // Passer à l'index suivant
-        slides.style.transform = `translateX(-${index * 100}%)`;
+        const slidesContainer = document.querySelector('.slides');
+        const totalSlides = slidesContainer.children.length;
+        index = (index + 1) % totalSlides;
+        slidesContainer.style.transform = `translateX(-${index * 100}%)`;
     };
-    setInterval(slideShow, 3000);  // Défilement toutes les 3 secondes
-
-   
-   
+    setInterval(slideShow, 3000);
 });

@@ -9,11 +9,10 @@
 <body>
     <header>
         <h1>Mes Commandes</h1>
-        <a href="./index.html" style="color: aliceblue;">ACCEUIL</a>
+        <a href="./index.html" style="color: aliceblue;">ACCUEIL</a>
     </header>
     <main>
         <h2>Suivi de vos commandes</h2>
-       
 
         <!-- Filtres -->
         <div class="filters">
@@ -98,7 +97,7 @@
                         }
 
                         orderDiv.innerHTML = `
-                            <p><strong>Date :</strong> ${orderDate.toLocaleString()}</p>
+                            <p><strong>Date :</strong> ${orderDate.toLocaleString('fr-FR')}</p>
                             <p><strong>Adresse :</strong> ${order.clientAddress}</p>
                             ${tacosDetails}
                             <p><strong>Total :</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
