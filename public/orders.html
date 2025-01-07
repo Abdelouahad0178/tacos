@@ -53,6 +53,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Liste des livreurs avec leurs noms et numéros de téléphone
+        const livreurs = [
+            { name: "Yassine", phone: "0612345678" },
+            { name: "Ilyass", phone: "0623456789" },
+            { name: "Rachid", phone: "0634567890" }
+        ];
+
+        // Fonction pour obtenir le nom du livreur à partir de son numéro de téléphone
+        const getLivreurName = (phone) => {
+            const livreur = livreurs.find(l => l.phone === phone);
+            return livreur ? livreur.name : "Inconnu";
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const ordersList = document.getElementById('orders-list');
             const filterDate = document.getElementById('filter-date');
@@ -96,13 +109,16 @@
                             });
                         }
 
+                        // Obtenir le nom du livreur
+                        const livreurName = getLivreurName(order.commercialPhone);
+
                         orderDiv.innerHTML = `
                             <p><strong>Date :</strong> ${orderDate.toLocaleString('fr-FR')}</p>
                             <p><strong>Adresse :</strong> ${order.clientAddress}</p>
                             ${tacosDetails}
                             <p><strong>Total :</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
-                            <p><strong>Statut :</strong> ${order.orderStatus}</p>
-                            <p><strong>Livreur :</strong> ${order.commercialPhone || 'Non attribué'}</p>
+                            <p style="color: green;"><strong>Statut :</strong> ${order.orderStatus}</p>
+                            <p><strong>Livreur :</strong> ${livreurName} (${order.commercialPhone || 'Non attribué'})</p>
                         `;
                         ordersList.appendChild(orderDiv);
                     }

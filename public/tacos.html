@@ -91,7 +91,7 @@
                                 ${tacosDetails}
                                 <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                                 <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString() || 'Non spécifiée'}</p>
-                                <p><strong>Statut:</strong>
+                                <p ><strong style="color: green;">Statut:</strong>
                                     <label><input type="radio" name="status-${childSnapshot.key}" value="Accepté" ${order.orderStatus === 'Accepté' ? 'checked' : ''}> Accepté</label>
                                     <label><input type="radio" name="status-${childSnapshot.key}" value="livré" ${order.orderStatus === 'livré' ? 'checked' : ''}> Livré</label>
                                     <label><input type="radio" name="status-${childSnapshot.key}" value="annulé" ${order.orderStatus === 'annulé' ? 'checked' : ''}> Annulé</label>
