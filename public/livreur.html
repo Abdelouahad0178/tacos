@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livreur - GRAND TACOS</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #ff5722;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .order {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+
+        .order p {
+            margin: 0.5rem 0;
+        }
+
+        button {
+            margin-right: 0.5rem;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .mark-delivered-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .mark-delivered-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Espace Livreur</h1>
+        <a href="./index.html" style="color: aliceblue;">ACCUEIL</a>
+    </header>
+    <main>
+        <h2>Liste des Commandes à Livrer</h2>
+        <div id="orders-list">
+            <p>Chargement des commandes...</p>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 GRAND TACOS - Tous droits réservés.</p>
+    </footer>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
+        import { getDatabase, ref, onValue, update } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdp0QPxkC2TSpd5zVComDmxNOlZy5jSt0",
+            authDomain: "mariajob01.firebaseapp.com",
+            databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
+            projectId: "mariajob01",
+            storageBucket: "mariajob01.appspot.com",
+            messagingSenderId: "253374710047",
+            appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
+            measurementId: "G-79642QZTTM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ordersList = document.getElementById('orders-list');
+            const livreurPhone = prompt("Veuillez saisir votre numéro de téléphone pour accéder à vos commandes :");
+
+            if (!livreurPhone) {
+                ordersList.innerHTML = "<p>Numéro de téléphone requis pour afficher les commandes.</p>";
+                return;
+            }
+
+            const renderOrders = (snapshot) => {
+                ordersList.innerHTML = ""; // Efface le contenu précédent
+                let hasOrders = false;
+
+                snapshot.forEach((childSnapshot) => {
+                    const order = childSnapshot.val();
+                    if (order.orderStatus === "Accepté" && order.commercialPhone === livreurPhone) {
+                        hasOrders = true;
+                        const orderDiv = document.createElement('div');
+                        orderDiv.className = "order";
+
+                        let tacosDetails = "";
+                        if (order.tacos && Array.isArray(order.tacos)) {
+                            order.tacos.forEach(taco => {
+                                tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        orderDiv.innerHTML = `
+                            <p><strong>Nom:</strong> ${order.clientName}</p>
+                            <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
+                            <p><strong>Adresse:</strong> ${order.clientAddress}</p>
+                            ${tacosDetails}
+                            <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
+                            <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                            <button class="mark-delivered-btn" data-id="${childSnapshot.key}">Marquer comme Livré</button>
+                        `;
+                        ordersList.appendChild(orderDiv);
+
+                        // Marquer la commande comme livrée
+                        orderDiv.querySelector('.mark-delivered-btn').addEventListener('click', () => {
+                            const orderId = childSnapshot.key;
+                            update(ref(db, `orders/${orderId}`), { orderStatus: "livré" })
+                                .then(() => {
+                                    alert("Commande marquée comme livrée avec succès !");
+                                    orderDiv.remove(); // Retirer la commande de la liste
+                                })
+                                .catch((error) => {
+                                    console.error("Erreur lors de la mise à jour :", error);
+                                });
+                        });
+                    }
+                });
+
+                if (!hasOrders) {
+                    ordersList.innerHTML = "<p>Aucune commande à livrer pour le moment.</p>";
+                }
+            };
+
+            // Charger les commandes initialement
+            onValue(ref(db, 'orders'), (snapshot) => {
+                renderOrders(snapshot);
+            });
+        });
+    </script>
+</body>
+</html>

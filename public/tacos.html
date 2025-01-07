@@ -13,7 +13,7 @@
             authDomain: "mariajob01.firebaseapp.com",
             databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
             projectId: "mariajob01",
-            storageBucket: "mariajob01.firebasestorage.app",
+            storageBucket: "mariajob01.appspot.com",
             messagingSenderId: "253374710047",
             appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
             measurementId: "G-79642QZTTM"
@@ -24,14 +24,15 @@
 
         // Liste des commerciaux
         const commerciaux = [
-            { name: "Livreur 1", phone: "0612345678" },
-            { name: "Livreur 2", phone: "0623456789" },
-            { name: "Livreur 3", phone: "0634567890" }
+            { name: "yassine", phone: "0612345678" },
+            { name: "ilyass", phone: "0623456789" },
+            { name: "rachid", phone: "0634567890" }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
             const ordersContainer = document.getElementById('orders-container');
             const summaryContainer = document.getElementById('summary-container');
+            const livreurSalesContainer = document.getElementById('livreur-sales-container');
             const startDateInput = document.getElementById('start-date');
             const endDateInput = document.getElementById('end-date');
             const today = new Date();
@@ -110,21 +111,32 @@
                             div.querySelectorAll(`input[name="status-${childSnapshot.key}"]`).forEach(radio => {
                                 radio.addEventListener('change', () => {
                                     const newStatus = document.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
-                                    update(ref(db, `orders/${childSnapshot.key}`), { orderStatus: newStatus })
-                                        .then(() => {
-                                            console.log('Statut mis à jour automatiquement');
-                                            updateSalesSummary();
-                                        });
+                                    const commercialSelect = div.querySelector('.commercial-select');
+                                    const commercialPhone = commercialSelect.value;
+
+                                    // Mettre à jour le statut et le livreur dans Firebase
+                                    update(ref(db, `orders/${childSnapshot.key}`), { 
+                                        orderStatus: newStatus,
+                                        commercialPhone: commercialPhone
+                                    }).then(() => {
+                                        console.log('Statut et livreur mis à jour');
+                                        updateSalesSummary();
+                                    });
                                 });
                             });
 
-                            // Mise à jour du commercial sélectionné
+                            // Mise à jour du livreur sélectionné
                             div.querySelector('.commercial-select').addEventListener('change', (e) => {
                                 const commercialPhone = e.target.value;
-                                update(ref(db, `orders/${childSnapshot.key}`), { commercialPhone })
-                                    .then(() => {
-                                        console.log('Livreur mis à jour');
-                                    });
+                                const status = div.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
+
+                                // Mettre à jour le livreur dans Firebase
+                                update(ref(db, `orders/${childSnapshot.key}`), { 
+                                    commercialPhone: commercialPhone,
+                                    orderStatus: status // Conserver le statut actuel
+                                }).then(() => {
+                                    console.log('Livreur mis à jour');
+                                });
                             });
 
                             // Supprimer la commande
@@ -159,6 +171,7 @@
                 onValue(ref(db, 'orders'), (snapshot) => {
                     let totalSales = 0;
                     const tacoSales = {};
+                    const livreurSales = {};
 
                     snapshot.forEach((childSnapshot) => {
                         const order = childSnapshot.val();
@@ -175,18 +188,56 @@
                                     tacoSales[taco.category] += taco.quantity;
                                 });
                             }
+
+                            // Calcul des ventes par livreur
+                            const livreur = commerciaux.find(com => com.phone === order.commercialPhone);
+                            if (livreur) {
+                                if (!livreurSales[livreur.name]) {
+                                    livreurSales[livreur.name] = {
+                                        total: 0,
+                                        tacos: {}
+                                    };
+                                }
+                                livreurSales[livreur.name].total += order.total || 0;
+
+                                order.tacos.forEach(taco => {
+                                    if (!livreurSales[livreur.name].tacos[taco.category]) {
+                                        livreurSales[livreur.name].tacos[taco.category] = 0;
+                                    }
+                                    livreurSales[livreur.name].tacos[taco.category] += taco.quantity;
+                                });
+                            }
                         }
                     });
 
-                    let tacoSummaryHTML = '<table class="sales-summary"><thead><tr><th>Catégorie</th><th>Quantité</th></tr></thead><tbody>';
-                    for (const [category, quantity] of Object.entries(tacoSales)) {
-                        tacoSummaryHTML += `<tr><td>${category}</td><td>${quantity}</td></tr>`;
-                    }
-                    tacoSummaryHTML += '</tbody></table>';
+                    // Afficher le résumé des ventes par livreur
+                    let livreurSalesHTML = '<table class="sales-summary"><thead><tr><th>Livreur</th><th>Catégorie</th><th>Quantité</th><th>Montant</th></tr></thead><tbody>';
+                    let grandTotal = 0;
 
-                    summaryContainer.innerHTML = `
-                        <p><strong>Total des ventes (livré):</strong> ${totalSales.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
-                        ${tacoSummaryHTML}
+                    for (const [livreurName, data] of Object.entries(livreurSales)) {
+                        livreurSalesHTML += `<tr><td rowspan="${Object.keys(data.tacos).length}">${livreurName}</td>`;
+                        let firstRow = true;
+
+                        for (const [category, quantity] of Object.entries(data.tacos)) {
+                            if (!firstRow) {
+                                livreurSalesHTML += `<tr>`;
+                            }
+                            livreurSalesHTML += `
+                                <td>${category}</td>
+                                <td>${quantity}</td>
+                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
+                            </tr>`;
+                            firstRow = false;
+                        }
+                        grandTotal += data.total;
+                    }
+
+                    livreurSalesHTML += `<tr><td colspan="3"><strong>Grand Total</strong></td><td><strong>${grandTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</strong></td></tr>`;
+                    livreurSalesHTML += '</tbody></table>';
+
+                    livreurSalesContainer.innerHTML = `
+                        <h2>Ventes par Livreur</h2>
+                        ${livreurSalesHTML}
                     `;
                 });
             };
@@ -212,7 +263,6 @@
             padding: 0;
             background-color: #f4f4f4;
             color: #333;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         header {
@@ -220,13 +270,11 @@
             color: white;
             padding: 1rem 0;
             text-align: center;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         header h1 {
             margin: 0;
             font-size: 1.8rem;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         main {
@@ -236,14 +284,12 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         .sales-summary {
             width: 100%;
             border-collapse: collapse;
             margin: 1rem 0;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         .sales-summary th, .sales-summary td {
@@ -255,7 +301,6 @@
         .sales-summary th {
             background-color: #ff5722;
             color: white;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         .filters {
@@ -268,7 +313,6 @@
             padding: 0.5rem;
             border: 1px solid #ddd;
             border-radius: 4px;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         .order {
@@ -277,7 +321,6 @@
             margin-bottom: 1rem;
             border-radius: 4px;
             background: #f9f9f9;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         .order p {
@@ -300,7 +343,6 @@
         .delete-btn {
             background-color: #dc3545;
             color: white;
-            filter: drop-shadow(0 5px 10px #0009);
         }
 
         button:hover {
@@ -335,6 +377,7 @@
         <div id="orders-container"></div>
         <h2>Résumé des Ventes</h2>
         <div id="summary-container"></div>
+        <div id="livreur-sales-container"></div>
     </main>
 
     <footer>
@@ -346,40 +389,5 @@
             <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
         </p>
     </footer>
-    <style>
-        footer {
-            background-color: #ff5722;
-            color: #fff;
-            text-align: center;
-            padding: 20px 10px;
-            font-family: 'Arial', sans-serif;
-            font-size: 18px;
-        }
-
-        footer p {
-            margin: 10px 0;
-        }
-
-        footer a {
-            color: #fff;
-            margin: 0 10px;
-            text-decoration: none;
-            font-size: 18px;
-            transition: color 0.3s ease;
-        }
-
-        footer a:hover {
-            color: #ff5733;
-        }
-
-        footer a i {
-            vertical-align: middle;
-        }
-
-        footer p:last-child {
-            margin-top: 15px;
-            font-size: 16px;
-        }
-    </style>
 </body>
 </html>
