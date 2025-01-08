@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Interne des Commandes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
         import { getDatabase, ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
@@ -348,6 +349,50 @@
         button:hover {
             opacity: 0.9;
         }
+
+
+
+
+/* Footer */
+footer {
+    background-color: #ff5722;
+    color: #fff;
+    text-align: center;
+    padding: 20px 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+}
+
+footer p {
+    margin: 10px 0;
+}
+
+footer a {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #844b3e;
+}
+
+footer a i {
+    vertical-align: middle;
+}
+
+footer p:last-child {
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+
+
+
+
+
 
         @media (max-width: 600px) {
             main {
