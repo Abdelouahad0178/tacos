@@ -44,7 +44,7 @@
             authDomain: "mariajob01.firebaseapp.com",
             databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
             projectId: "mariajob01",
-            storageBucket: "mariajob01.firebasestorage.app",
+            storageBucket: "mariajob01.appspot.com",
             messagingSenderId: "253374710047",
             appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
             measurementId: "G-79642QZTTM"
@@ -66,6 +66,15 @@
             return livreur ? livreur.name : "Inconnu";
         };
 
+        // Fonction pour obtenir la date du jour au format YYYY-MM-DD
+        const getTodayDate = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const ordersList = document.getElementById('orders-list');
             const filterDate = document.getElementById('filter-date');
@@ -76,6 +85,9 @@
                 ordersList.innerHTML = "<p>Numéro de téléphone requis pour afficher les commandes.</p>";
                 return;
             }
+
+            // Définir la date du jour dans le filtre de date
+            filterDate.value = getTodayDate();
 
             const renderOrders = (snapshot) => {
                 ordersList.innerHTML = ""; // Efface le contenu précédent
@@ -88,7 +100,7 @@
                         const filterDateValue = filterDate.value ? new Date(filterDate.value) : null;
                         const filterStatusValue = filterStatus.value;
 
-                        // Filtrer par date
+                        // Filtrer par date (uniquement les commandes du jour par défaut)
                         if (filterDateValue && orderDate.toDateString() !== filterDateValue.toDateString()) {
                             return;
                         }
@@ -129,7 +141,7 @@
                 }
             };
 
-            // Charger les commandes initialement
+            // Charger les commandes initialement (uniquement celles du jour)
             onValue(ref(db, 'orders'), (snapshot) => {
                 renderOrders(snapshot);
             });
