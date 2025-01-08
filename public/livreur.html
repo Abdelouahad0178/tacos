@@ -64,6 +64,30 @@
             background-color: #218838;
         }
 
+        .history {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-top: 2px solid #ddd;
+        }
+
+        .history h3 {
+            margin-top: 0;
+        }
+
+        .history-filter {
+            margin-bottom: 1rem;
+        }
+
+        .history-filter label {
+            margin-right: 0.5rem;
+        }
+
+        .history-filter input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
         @media (max-width: 600px) {
             main {
                 padding: 1rem;
@@ -81,9 +105,22 @@
         <div id="orders-list">
             <p>Chargement des commandes...</p>
         </div>
+
+        <!-- Historique des ventes -->
+        <div class="history">
+            <h3>Historique des Ventes</h3>
+            <div class="history-filter">
+                <label for="history-date">Filtrer par date :</label>
+                <input type="date" id="history-date">
+            </div>
+            <div id="history-list">
+                <p>Chargement de l'historique...</p>
+            </div>
+            <p><strong>Total des ventes :</strong> <span id="total-sales">0.00 MAD</span></p>
+        </div>
     </main>
     <footer>
-        <p>&copy; 2024 GRAND TACOS - Tous droits réservés.</p>
+        <p>&copy; 2025 GRAND TACOS - Tous droits réservés.</p>
     </footer>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
@@ -105,6 +142,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const ordersList = document.getElementById('orders-list');
+            const historyList = document.getElementById('history-list');
+            const totalSalesElement = document.getElementById('total-sales');
+            const historyDateFilter = document.getElementById('history-date');
             const livreurPhone = prompt("Veuillez saisir votre numéro de téléphone pour accéder à vos commandes :");
 
             if (!livreurPhone) {
@@ -112,6 +152,7 @@
                 return;
             }
 
+            // Fonction pour afficher les commandes à livrer
             const renderOrders = (snapshot) => {
                 ordersList.innerHTML = ""; // Efface le contenu précédent
                 let hasOrders = false;
@@ -161,9 +202,68 @@
                 }
             };
 
-            // Charger les commandes initialement
+            // Fonction pour afficher l'historique des ventes
+            const renderHistory = (snapshot) => {
+                historyList.innerHTML = ""; // Efface le contenu précédent
+                let totalSales = 0;
+                let hasHistory = false;
+
+                snapshot.forEach((childSnapshot) => {
+                    const order = childSnapshot.val();
+                    if (order.orderStatus === "livré" && order.commercialPhone === livreurPhone) {
+                        const orderDate = new Date(order.timestamp);
+                        const filterDateValue = historyDateFilter.value ? new Date(historyDateFilter.value) : null;
+
+                        // Filtrer par date
+                        if (filterDateValue && orderDate.toDateString() !== filterDateValue.toDateString()) {
+                            return;
+                        }
+
+                        hasHistory = true;
+                        const orderDiv = document.createElement('div');
+                        orderDiv.className = "order";
+
+                        let tacosDetails = "";
+                        if (order.tacos && Array.isArray(order.tacos)) {
+                            order.tacos.forEach(taco => {
+                                tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        orderDiv.innerHTML = `
+                            <p><strong>Nom:</strong> ${order.clientName}</p>
+                            <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
+                            <p><strong>Adresse:</strong> ${order.clientAddress}</p>
+                            ${tacosDetails}
+                            <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
+                            <p><strong>Date & Heure:</strong> ${orderDate.toLocaleString()}</p>
+                        `;
+                        historyList.appendChild(orderDiv);
+
+                        // Ajouter au total des ventes
+                        totalSales += order.total;
+                    }
+                });
+
+                if (!hasHistory) {
+                    historyList.innerHTML = "<p>Aucune vente trouvée pour cette date.</p>";
+                }
+
+                // Afficher le total des ventes
+                totalSalesElement.textContent = totalSales.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' });
+            };
+
+            // Charger les commandes à livrer initialement
             onValue(ref(db, 'orders'), (snapshot) => {
                 renderOrders(snapshot);
+                renderHistory(snapshot); // Afficher l'historique initial
+            });
+
+            // Filtrer l'historique par date
+            historyDateFilter.addEventListener('input', () => {
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    renderHistory(snapshot);
+                });
             });
         });
     </script>
