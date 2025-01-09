@@ -115,9 +115,19 @@
                         orderDiv.className = "order";
 
                         let tacosDetails = "";
+                        let boissonsDetails = "";
+
+                        // Afficher les tacos
                         if (order.tacos && Array.isArray(order.tacos)) {
                             order.tacos.forEach(taco => {
                                 tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        // Afficher les boissons
+                        if (order.boissons && Array.isArray(order.boissons)) {
+                            order.boissons.forEach(boisson => {
+                                boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
                             });
                         }
 
@@ -128,6 +138,7 @@
                             <p><strong>Date :</strong> ${orderDate.toLocaleString('fr-FR')}</p>
                             <p><strong>Adresse :</strong> ${order.clientAddress}</p>
                             ${tacosDetails}
+                            ${boissonsDetails}
                             <p><strong>Total :</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                             <p style="color: green;"><strong>Statut :</strong> ${order.orderStatus}</p>
                             <p><strong>Livreur :</strong> ${livreurName} (${order.commercialPhone || 'Non attribué'})</p>
@@ -161,54 +172,100 @@
         });
     </script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
 
+        header {
+            background-color: #ff5722;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
 
+        header h1 {
+            margin: 0;
+        }
 
-/* Footer */
-footer {
-    background-color: #ff5722;
-    color: #fff;
-    text-align: center;
-    padding: 20px 10px;
-    font-family: 'Arial', sans-serif;
-    font-size: 14px;
-}
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
 
-footer p {
-    margin: 10px 0;
-}
+        header a:hover {
+            text-decoration: underline;
+        }
 
-footer a {
-    color: #fff;
-    margin: 0 10px;
-    text-decoration: none;
-    font-size: 18px;
-    transition: color 0.3s ease;
-}
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-footer a:hover {
-    color: #844b3e;
-}
+        .filters {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
 
-footer a i {
-    vertical-align: middle;
-}
+        .filters label {
+            font-weight: bold;
+        }
 
-footer p:last-child {
-    margin-top: 15px;
-    font-size: 16px;
-}
+        .filters input,
+        .filters select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
 
+        #orders-list {
+            margin-top: 1rem;
+        }
 
+        .order {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
 
+        .order p {
+            margin: 0.5rem 0;
+        }
 
+        footer {
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
 
+        footer p {
+            margin: 0;
+        }
 
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
 
-
-
-
-
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </body>
 </html>

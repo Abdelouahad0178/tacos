@@ -165,9 +165,19 @@
                         orderDiv.className = "order";
 
                         let tacosDetails = "";
+                        let boissonsDetails = "";
+
+                        // Afficher les tacos
                         if (order.tacos && Array.isArray(order.tacos)) {
                             order.tacos.forEach(taco => {
                                 tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        // Afficher les boissons
+                        if (order.boissons && Array.isArray(order.boissons)) {
+                            order.boissons.forEach(boisson => {
+                                boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
                             });
                         }
 
@@ -176,6 +186,7 @@
                             <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
                             <p><strong>Adresse:</strong> ${order.clientAddress}</p>
                             ${tacosDetails}
+                            ${boissonsDetails}
                             <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                             <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
                             <button class="mark-delivered-btn" data-id="${childSnapshot.key}">Marquer comme Livré</button>
@@ -224,9 +235,19 @@
                         orderDiv.className = "order";
 
                         let tacosDetails = "";
+                        let boissonsDetails = "";
+
+                        // Afficher les tacos
                         if (order.tacos && Array.isArray(order.tacos)) {
                             order.tacos.forEach(taco => {
                                 tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                            });
+                        }
+
+                        // Afficher les boissons
+                        if (order.boissons && Array.isArray(order.boissons)) {
+                            order.boissons.forEach(boisson => {
+                                boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
                             });
                         }
 
@@ -235,6 +256,7 @@
                             <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
                             <p><strong>Adresse:</strong> ${order.clientAddress}</p>
                             ${tacosDetails}
+                            ${boissonsDetails}
                             <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                             <p><strong>Date & Heure:</strong> ${orderDate.toLocaleString()}</p>
                         `;

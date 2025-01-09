@@ -35,27 +35,27 @@
     <div class="slider">
         <div class="slides">
             <div class="slide" data-category="Classique">
-                <img src="images/TacosClassic.png" alt="Tacos Classique">
+                <img src="images/TacosClassic.png" alt="Classique">
                 <h3>Classique - 50 DHS</h3>
             </div>
             <div class="slide" data-category="Géant">
-                <img src="images/TacosGeant.png" alt="Tacos Géant">
+                <img src="images/TacosGeant.png" alt="Géant">
                 <h3>Géant - 80 DHS</h3>
             </div>
             <div class="slide" data-category="Végétarien">
-                <img src="images/TacosVegetal.png" alt="Tacos Végétarien">
+                <img src="images/TacosVegetal.png" alt="Végétarien">
                 <h3>Végétarien - 60 DHS</h3>
             </div>
             <div class="slide" data-category="Spécial">
-                <img src="images/TacosSpecial.png" alt="Tacos Spécial">
+                <img src="images/TacosSpecial.png" alt="Spécial">
                 <h3>Spécial - 100 DHS</h3>
             </div>
             <div class="slide" data-category="Mexico">
-                <img src="images/tacosmexico.png" alt="Tacos Mexico">
+                <img src="images/tacosmexico.png" alt="Mexico">
                 <h3>Mexico - 120 DHS</h3>
             </div>
             <div class="slide" data-category="Margherita">
-                <img src="images/PizzaMargherita.jpg" alt="Pizza Margherita" style="width: 50%; height: 60%;">
+                <img src="images/PizzaMargherita.jpg" alt="Margherita" style="width: 50%; height: 60%;">
                 <h3>Pizza Margherita - 120 DHS</h3>
             </div>
         </div>
@@ -108,6 +108,26 @@
                 </div>
             </div>
 
+            <!-- Section des boissons -->
+            <label>Boissons :</label>
+            <div id="boissons-list">
+                <div>
+                    <img src="images/boissons1.jpg" alt="Boisson1">
+                    <label>Boisson 1 - 10 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Boisson1" min="0" value="0">
+                </div>
+                <div>
+                    <img src="images/boisson2.jpg" alt="Boisson2">
+                    <label>Boisson 2 - 15 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Boisson2" min="0" value="0">
+                </div>
+                <div>
+                    <img src="images/boisson3.jpg" alt="Boisson3">
+                    <label>Boisson 3 - 20 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Boisson3" min="0" value="0">
+                </div>
+            </div>
+
             <div id="total-display">Total à payer : 0 DHS</div>
             <button type="submit">Commander</button>
         </form>
@@ -136,62 +156,6 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script>
-        // Calcul du total
-        const prices = {
-            'Classique': 50,
-            'Géant': 80,
-            'Végétarien': 60,
-            'Spécial': 100,
-            'Mexico': 120,
-            'Margherita': 110
-        };
-
-        const updateTotal = () => {
-            let total = 0;
-            document.querySelectorAll('.tacos-quantity').forEach(input => {
-                const category = input.dataset.category;
-                const quantity = parseInt(input.value, 10) || 0;
-                total += quantity * prices[category];
-            });
-            document.getElementById('total-display').textContent = `Total à payer : ${total} DHS`;
-            document.getElementById('total-display-header').textContent = `Total à payer : ${total} DHS`;
-        };
-
-        document.querySelectorAll('.tacos-quantity').forEach(input => {
-            input.addEventListener('input', updateTotal);
-        });
-
-        // Modal : afficher les détails du produit
-        const openModal = (title, description, imageSrc) => {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-description').textContent = description;
-            document.getElementById('modal-image').src = imageSrc;
-            document.getElementById('modal').style.display = 'block';
-        };
-
-        // Fermer le modal
-        document.querySelector('.close-btn').addEventListener('click', () => {
-            document.getElementById('modal').style.display = 'none';
-        });
-
-        // Événements sur les images du slider
-        document.querySelectorAll('.slide').forEach(slide => {
-            slide.addEventListener('click', (e) => {
-                const title = e.target.alt;
-                const description = e.target.nextElementSibling.textContent;
-                const imageSrc = e.target.src;
-                openModal(title, description, imageSrc);
-            });
-        });
-
-        // Animation du slider avec GSAP
-        gsap.from(".slide", {
-            opacity: 0,
-            duration: 1,
-            stagger: 0.2
-        });
-    </script>
     <script type="module" src="./script.js"></script>
 </body>
 

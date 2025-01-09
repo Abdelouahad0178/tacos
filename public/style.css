@@ -43,9 +43,6 @@ header .contact-info a:hover {
     text-decoration: underline;
 }
 
-
-
-
 /* Style du statut d'ouverture */
 #status-display {
     position: fixed;
@@ -81,28 +78,6 @@ header .contact-info a:hover {
     z-index: 999;
     /* Moins élevé que l'horaire */
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* Slider */
 .slider {
@@ -202,6 +177,40 @@ button:hover {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+}
+
+/* Boissons categories */
+#boissons-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#boissons-list img {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+#boissons-list div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#boissons-list label {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#boissons-list input {
+    width: 60px;
+    text-align: center;
 }
 
 #total-display {
@@ -338,7 +347,8 @@ footer p:last-child {
         width: 90%;
     }
 
-    #tacos-categories img {
+    #tacos-categories img,
+    #boissons-list img {
         width: 60px;
         height: 60px;
     }
@@ -360,6 +370,12 @@ footer p:last-child {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    #total-display-header {
+        font-size: 12px;
+        top: 37px;
+        right: 10px;
+    }
 }
 
 /* Total à payer en haut à droite */
@@ -380,15 +396,6 @@ footer p:last-child {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     /* Assurer que le total soit toujours visible au-dessus des autres éléments */
-}
-
-/* Ajuster la taille du total lorsqu'il est visible sur mobile */
-@media (max-width: 768px) {
-    #total-display-header {
-        font-size: 12px;
-        top: 37px;
-        right: 10px;
-    }
 }
 
 /* Style de l'élément de statut */

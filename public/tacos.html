@@ -77,9 +77,19 @@
                         if (orderTimestamp >= startTime && orderTimestamp <= endTime) {
                             orderCount++;
                             let tacosDetails = '';
+                            let boissonsDetails = '';
+
+                            // Afficher les tacos
                             if (order.tacos && Array.isArray(order.tacos)) {
                                 order.tacos.forEach(taco => {
                                     tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                                });
+                            }
+
+                            // Afficher les boissons
+                            if (order.boissons && Array.isArray(order.boissons)) {
+                                order.boissons.forEach(boisson => {
+                                    boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
                                 });
                             }
 
@@ -90,6 +100,7 @@
                                 <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
                                 <p><strong>Adresse:</strong> ${order.clientAddress}</p>
                                 ${tacosDetails}
+                                ${boissonsDetails}
                                 <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                                 <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString() || 'Non spécifiée'}</p>
                                 <p ><strong style="color: green;">Statut:</strong>
@@ -172,6 +183,7 @@
                 onValue(ref(db, 'orders'), (snapshot) => {
                     let totalSales = 0;
                     const tacoSales = {};
+                    const boissonSales = {};
                     const livreurSales = {};
 
                     snapshot.forEach((childSnapshot) => {
@@ -181,6 +193,7 @@
                         if (orderTimestamp >= startTime && orderTimestamp <= endTime && order.orderStatus === "livré") {
                             totalSales += order.total || 0;
 
+                            // Calcul des ventes de tacos
                             if (order.tacos && Array.isArray(order.tacos)) {
                                 order.tacos.forEach(taco => {
                                     if (!tacoSales[taco.category]) {
@@ -190,23 +203,47 @@
                                 });
                             }
 
+                            // Calcul des ventes de boissons
+                            if (order.boissons && Array.isArray(order.boissons)) {
+                                order.boissons.forEach(boisson => {
+                                    if (!boissonSales[boisson.category]) {
+                                        boissonSales[boisson.category] = 0;
+                                    }
+                                    boissonSales[boisson.category] += boisson.quantity;
+                                });
+                            }
+
                             // Calcul des ventes par livreur
                             const livreur = commerciaux.find(com => com.phone === order.commercialPhone);
                             if (livreur) {
                                 if (!livreurSales[livreur.name]) {
                                     livreurSales[livreur.name] = {
                                         total: 0,
-                                        tacos: {}
+                                        tacos: {},
+                                        boissons: {}
                                     };
                                 }
                                 livreurSales[livreur.name].total += order.total || 0;
 
-                                order.tacos.forEach(taco => {
-                                    if (!livreurSales[livreur.name].tacos[taco.category]) {
-                                        livreurSales[livreur.name].tacos[taco.category] = 0;
-                                    }
-                                    livreurSales[livreur.name].tacos[taco.category] += taco.quantity;
-                                });
+                                // Ventes de tacos par livreur
+                                if (order.tacos) {
+                                    order.tacos.forEach(taco => {
+                                        if (!livreurSales[livreur.name].tacos[taco.category]) {
+                                            livreurSales[livreur.name].tacos[taco.category] = 0;
+                                        }
+                                        livreurSales[livreur.name].tacos[taco.category] += taco.quantity;
+                                    });
+                                }
+
+                                // Ventes de boissons par livreur
+                                if (order.boissons) {
+                                    order.boissons.forEach(boisson => {
+                                        if (!livreurSales[livreur.name].boissons[boisson.category]) {
+                                            livreurSales[livreur.name].boissons[boisson.category] = 0;
+                                        }
+                                        livreurSales[livreur.name].boissons[boisson.category] += boisson.quantity;
+                                    });
+                                }
                             }
                         }
                     });
@@ -216,10 +253,24 @@
                     let grandTotal = 0;
 
                     for (const [livreurName, data] of Object.entries(livreurSales)) {
-                        livreurSalesHTML += `<tr><td rowspan="${Object.keys(data.tacos).length}">${livreurName}</td>`;
+                        livreurSalesHTML += `<tr><td rowspan="${Object.keys(data.tacos).length + Object.keys(data.boissons).length}">${livreurName}</td>`;
                         let firstRow = true;
 
+                        // Afficher les tacos
                         for (const [category, quantity] of Object.entries(data.tacos)) {
+                            if (!firstRow) {
+                                livreurSalesHTML += `<tr>`;
+                            }
+                            livreurSalesHTML += `
+                                <td>${category}</td>
+                                <td>${quantity}</td>
+                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
+                            </tr>`;
+                            firstRow = false;
+                        }
+
+                        // Afficher les boissons
+                        for (const [category, quantity] of Object.entries(data.boissons)) {
                             if (!firstRow) {
                                 livreurSalesHTML += `<tr>`;
                             }
@@ -350,49 +401,40 @@
             opacity: 0.9;
         }
 
+        /* Footer */
+        footer {
+            background-color: #ff5722;
+            color: #fff;
+            text-align: center;
+            padding: 20px 10px;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+        }
 
+        footer p {
+            margin: 10px 0;
+        }
 
+        footer a {
+            color: #fff;
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
 
-/* Footer */
-footer {
-    background-color: #ff5722;
-    color: #fff;
-    text-align: center;
-    padding: 20px 10px;
-    font-family: 'Arial', sans-serif;
-    font-size: 14px;
-}
+        footer a:hover {
+            color: #844b3e;
+        }
 
-footer p {
-    margin: 10px 0;
-}
+        footer a i {
+            vertical-align: middle;
+        }
 
-footer a {
-    color: #fff;
-    margin: 0 10px;
-    text-decoration: none;
-    font-size: 18px;
-    transition: color 0.3s ease;
-}
-
-footer a:hover {
-    color: #844b3e;
-}
-
-footer a i {
-    vertical-align: middle;
-}
-
-footer p:last-child {
-    margin-top: 15px;
-    font-size: 16px;
-}
-
-
-
-
-
-
+        footer p:last-child {
+            margin-top: 15px;
+            font-size: 16px;
+        }
 
         @media (max-width: 600px) {
             main {
