@@ -88,6 +88,25 @@
             border-radius: 4px;
         }
 
+        .navigation-buttons {
+            margin-top: 10px;
+        }
+
+        .map-button {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 8px 12px;
+            background-color: #ff5722;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .map-button:hover {
+            background-color: #e64a19;
+        }
+
         @media (max-width: 600px) {
             main {
                 padding: 1rem;
@@ -189,6 +208,15 @@
                             ${boissonsDetails}
                             <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
                             <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+
+                            <!-- Boutons pour Google Maps et Waze -->
+                            <div class="navigation-buttons">
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.clientAddress)}" target="_blank" class="map-button">
+                                    Ouvrir dans Google Maps
+                                </a>
+                                
+                            </div>
+
                             <button class="mark-delivered-btn" data-id="${childSnapshot.key}">Marquer comme Livré</button>
                         `;
                         ordersList.appendChild(orderDiv);

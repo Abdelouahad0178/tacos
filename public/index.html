@@ -72,7 +72,15 @@
             <input type="tel" id="client-phone" required>
 
             <label for="client-address">Adresse :</label>
-            <textarea id="client-address" rows="3" required></textarea>
+            <div class="address-input">
+                <textarea id="client-address" rows="3" required></textarea>
+                <button type="button" id="get-location-btn">
+                    <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
+                </button>
+                <div id="loading-spinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Récupération de votre localisation...
+                </div>
+            </div>
 
             <label>Tacos :</label>
             <div id="tacos-categories">
@@ -157,6 +165,58 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script type="module" src="./script.js"></script>
+
+    <!-- Intégration de l'API Google Maps -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addressInput = document.getElementById('client-address');
+            const getLocationBtn = document.getElementById('get-location-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            // Fonction pour récupérer la localisation de l'utilisateur
+            getLocationBtn.addEventListener('click', () => {
+                if (navigator.geolocation) {
+                    // Afficher le spinner pendant la récupération
+                    loadingSpinner.style.display = 'block';
+                    addressInput.value = "";
+
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const { latitude, longitude } = position.coords;
+
+                            try {
+                                // Utiliser une variable d'environnement pour la clé API
+                                const apiKey = "AIzaSyBb7csOUmRUXI787W9c2q9EtYVOQPYtH2c"; // Remplacez par votre clé API
+                                const response = await fetch(
+                                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+                                );
+                                const data = await response.json();
+
+                                if (data.results && data.results[0]) {
+                                    addressInput.value = data.results[0].formatted_address;
+                                } else {
+                                    throw new Error("Aucune adresse trouvée.");
+                                }
+                            } catch (error) {
+                                console.error("Erreur :", error);
+                                alert("Impossible de récupérer l'adresse. Veuillez la saisir manuellement.");
+                            } finally {
+                                // Masquer le spinner
+                                loadingSpinner.style.display = 'none';
+                            }
+                        },
+                        (error) => {
+                            console.error("Erreur de géolocalisation :", error);
+                            alert("Vous devez autoriser l'accès à votre localisation pour utiliser cette fonctionnalité.");
+                            loadingSpinner.style.display = 'none';
+                        }
+                    );
+                } else {
+                    alert("La géolocalisation n'est pas supportée par votre navigateur.");
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des Clients Livrés - GRAND TACOS</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #ff5722;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .filters {
+            margin-bottom: 20px;
+        }
+        .filters label {
+            font-weight: bold;
+        }
+        .filters select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 200px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #ff5722;
+            color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        footer {
+            background-color: #ff5722;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 20px;
+        }
+
+        /* Styles pour les écrans de petite taille */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+            main {
+                padding: 10px;
+            }
+            .filters select {
+                max-width: 100%;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            table th, table td {
+                min-width: 120px; /* Largeur minimale des cellules */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Historique des Clients Livrés</h1>
+        <a href="./index.html">ACCUEIL</a>
+    </header>
+    <main>
+        <h2>Clients Livrés</h2>
+        <div class="filters">
+            <label for="month-select">Filtrer par mois :</label>
+            <select id="month-select">
+                <option value="all">Tous les mois</option>
+                <option value="01">Janvier</option>
+                <option value="02">Février</option>
+                <option value="03">Mars</option>
+                <option value="04">Avril</option>
+                <option value="05">Mai</option>
+                <option value="06">Juin</option>
+                <option value="07">Juillet</option>
+                <option value="08">Août</option>
+                <option value="09">Septembre</option>
+                <option value="10">Octobre</option>
+                <option value="11">Novembre</option>
+                <option value="12">Décembre</option>
+            </select>
+        </div>
+        <table id="history-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Téléphone</th>
+                    <th>Adresse</th>
+                    <th>Date</th>
+                    <th>Livreur</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les données seront injectées ici par JavaScript -->
+            </tbody>
+        </table>
+    </main>
+    <footer>
+        <p>&copy; 2025 GRAND TACOS - Tous droits réservés.</p>
+    </footer>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdp0QPxkC2TSpd5zVComDmxNOlZy5jSt0",
+            authDomain: "mariajob01.firebaseapp.com",
+            databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
+            projectId: "mariajob01",
+            storageBucket: "mariajob01.appspot.com",
+            messagingSenderId: "253374710047",
+            appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
+            measurementId: "G-79642QZTTM"
+        };
+
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Référence à la table des commandes
+        const ordersRef = ref(db, 'orders');
+
+        // Sélecteurs DOM
+        const monthSelect = document.getElementById('month-select');
+        const historyTableBody = document.querySelector('#history-table tbody');
+
+        // Fonction pour formater la date
+        const formatDate = (timestamp) => {
+            const date = new Date(timestamp);
+            return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+        };
+
+        // Fonction pour afficher les données filtrées
+        const renderHistory = (snapshot, selectedMonth) => {
+            historyTableBody.innerHTML = ''; // Effacer le contenu précédent
+
+            snapshot.forEach((childSnapshot) => {
+                const order = childSnapshot.val();
+
+                // Vérifier si la commande est livrée
+                if (order && order.timestamp && order.orderStatus === "livré") {
+                    const orderDate = new Date(order.timestamp);
+                    const orderMonth = String(orderDate.getMonth() + 1).padStart(2, '0');
+
+                    // Appliquer le filtre par mois
+                    if (selectedMonth === "all" || selectedMonth === orderMonth) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${order.clientName || "N/A"}</td>
+                            <td>${order.clientPhone || "N/A"}</td>
+                            <td>${order.clientAddress || "N/A"}</td>
+                            <td>${formatDate(order.timestamp)}</td>
+                            <td>${order.commercialPhone || "N/A"}</td>
+                        `;
+                        historyTableBody.appendChild(row);
+                    }
+                }
+            });
+
+            // Afficher un message si aucune donnée n'est trouvée
+            if (historyTableBody.innerHTML === '') {
+                historyTableBody.innerHTML = '<tr><td colspan="5">Aucune commande livrée trouvée pour ce mois.</td></tr>';
+            }
+        };
+
+        // Charger les données initiales
+        const loadData = () => {
+            const selectedMonth = monthSelect.value;
+            onValue(ordersRef, (snapshot) => {
+                renderHistory(snapshot, selectedMonth);
+            }, (error) => {
+                console.error("Erreur lors de la récupération des données :", error);
+                historyTableBody.innerHTML = '<tr><td colspan="5">Erreur lors de la récupération des données.</td></tr>';
+            });
+        };
+
+        // Charger les données lorsque la page est chargée
+        loadData();
+
+        // Mettre à jour les données lorsque le mois est changé
+        monthSelect.addEventListener('change', loadData);
+    </script>
+</body>
+</html>
