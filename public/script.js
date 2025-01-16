@@ -14,6 +14,7 @@ const firebaseConfig = {
     measurementId: "G-79642QZTTM"
 };
 
+
 // Initialiser Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -198,4 +199,99 @@ document.addEventListener('DOMContentLoaded', () => {
         slidesContainer.style.transform = `translateX(-${index * 100}%)`;
     };
     setInterval(slideShow, 3000);
+});
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const slidesContainer = document.querySelector('.slides');
+    const slides = document.querySelectorAll('.slide');
+    const paginationContainer = document.querySelector('.pagination');
+    let currentIndex = 0;
+
+    // Générer les icônes de pagination
+    slides.forEach((slide, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('pagination-dot');
+        if (index === 0) dot.classList.add('active'); // Activer la première icône
+        dot.addEventListener('click', () => {
+            goToSlide(index);
+        });
+        paginationContainer.appendChild(dot);
+    });
+
+    // Fonction pour aller à une slide spécifique
+    function goToSlide(index) {
+        currentIndex = index;
+        const offset = -currentIndex * 100;
+        slidesContainer.style.transform = `translateX(${offset}%)`;
+
+        // Mettre à jour les icônes de pagination
+        updatePagination();
+    }
+
+    // Fonction pour mettre à jour les icônes de pagination
+    function updatePagination() {
+        const dots = document.querySelectorAll('.pagination-dot');
+        dots.forEach((dot, index) => {
+            if (index === currentIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // Défilement automatique du slider
+    setInterval(() => {
+        currentIndex = (currentIndex + 1) % slides.length;
+        goToSlide(currentIndex);
+    }, 3000);
+
+    // Gestion de la modal (déjà présent dans votre code)
+    const modal = document.getElementById('modal');
+    const closeBtn = document.querySelector('.close-btn');
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    const slidesElements = document.querySelectorAll('.slide');
+    slidesElements.forEach(slide => {
+        slide.addEventListener('click', () => {
+            const imageSrc = slide.querySelector('img').src;
+            const title = slide.querySelector('h3').textContent;
+
+            document.getElementById('modal-image').src = imageSrc;
+            document.getElementById('modal-title').textContent = title;
+            modal.style.display = 'flex';
+        });
+    });
+
+    // Gestion de la flèche de retour en haut (déjà présent dans votre code)
+    const backToTopBtn = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 });

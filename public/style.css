@@ -436,3 +436,27 @@ footer p:last-child {
 #get-location-btn:hover {
     background-color: #e64a19;
 }
+
+/* Styles pour les icônes de pagination */
+.pagination {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.pagination .pagination-dot {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(135, 135, 181, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination .pagination-dot.active {
+    background-color: #ff5722;
+}

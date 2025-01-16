@@ -46,6 +46,81 @@
         .close-btn:hover {
             color: #ff5722; /* Changement de couleur au survol */
         }
+
+        /* Styles pour le slider */
+        .slider {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            min-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .slide img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .slide h3 {
+            margin-top: 10px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        /* Styles pour le formulaire */
+        .address-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #loading-spinner {
+            display: none;
+            font-size: 1.2em;
+        }
+
+        #total-display-header {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #ff5722;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.2em;
+            z-index: 1000;
+        }
+
+        /* Styles pour la flèche de retour en haut */
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ff5722;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: none; /* Masqué par défaut */
+            z-index: 1000;
+        }
+
+        #back-to-top:hover {
+            background-color: #e64a19; /* Changement de couleur au survol */
+        }
     </style>
 </head>
 
@@ -53,6 +128,11 @@
     <!-- Total à payer en haut à droite -->
     <div id="total-display-header">
         Total à payer : 0 DHS
+    </div>
+
+    <!-- Flèche de retour en haut -->
+    <div id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
     </div>
 
     <header>
@@ -71,35 +151,40 @@
         </div>
     </header>
 
-    <!-- Slider des produits -->
-    <div class="slider">
-        <div class="slides">
-            <div class="slide" data-category="Classique">
-                <img src="images/TacosClassic.png" alt="Classique">
-                <h3>Classique - 50 DHS</h3>
-            </div>
-            <div class="slide" data-category="Géant">
-                <img src="images/TacosGeant.png" alt="Géant">
-                <h3>Géant - 80 DHS</h3>
-            </div>
-            <div class="slide" data-category="Végétarien">
-                <img src="images/TacosVegetal.png" alt="Végétarien">
-                <h3>Végétarien - 60 DHS</h3>
-            </div>
-            <div class="slide" data-category="Spécial">
-                <img src="images/TacosSpecial.png" alt="Spécial">
-                <h3>Spécial - 100 DHS</h3>
-            </div>
-            <div class="slide" data-category="Mexico">
-                <img src="images/tacosmexico.png" alt="Mexico">
-                <h3>Mexico - 120 DHS</h3>
-            </div>
-            <div class="slide" data-category="Margherita">
-                <img src="images/PizzaMargherita.jpg" alt="Margherita" style="width: 50%; height: 60%;">
-                <h3>Pizza Margherita - 120 DHS</h3>
-            </div>
+    
+   <!-- Slider des produits -->
+<div class="slider">
+    <div class="slides">
+        <div class="slide" data-category="Classique">
+            <img src="images/TacosClassic.png" alt="Classique">
+            <h3>Classique - 50 DHS</h3>
+        </div>
+        <div class="slide" data-category="Géant">
+            <img src="images/TacosGeant.png" alt="Géant">
+            <h3>Géant - 80 DHS</h3>
+        </div>
+        <div class="slide" data-category="Végétarien">
+            <img src="images/TacosVegetal.png" alt="Végétarien">
+            <h3>Végétarien - 60 DHS</h3>
+        </div>
+        <div class="slide" data-category="Spécial">
+            <img src="images/TacosSpecial.png" alt="Spécial">
+            <h3>Spécial - 100 DHS</h3>
+        </div>
+        <div class="slide" data-category="Mexico">
+            <img src="images/tacosmexico.png" alt="Mexico">
+            <h3>Mexico - 120 DHS</h3>
+        </div>
+        <div class="slide" data-category="Margherita">
+            <img src="images/PizzaMargherita.jpg" alt="Margherita" style="width: 50%; height: 60%;">
+            <h3>Pizza Margherita - 120 DHS</h3>
         </div>
     </div>
+    <!-- Icônes de pagination -->
+    <div class="pagination">
+        <!-- Les icônes seront générées dynamiquement par JavaScript -->
+    </div>
+</div>
 
     <!-- Formulaire de commande -->
     <main>
@@ -282,6 +367,26 @@
                     document.getElementById('modal-image').src = imageSrc;
                     document.getElementById('modal-title').textContent = title;
                     modal.style.display = 'flex'; // Afficher la modal
+                });
+            });
+
+            // Gestion de la flèche de retour en haut
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // Afficher ou masquer la flèche en fonction du défilement
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopBtn.style.display = 'block';
+                } else {
+                    backToTopBtn.style.display = 'none';
+                }
+            });
+
+            // Faire défiler la page vers le haut lorsque l'utilisateur clique sur la flèche
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth' // Défilement fluide
                 });
             });
         });
