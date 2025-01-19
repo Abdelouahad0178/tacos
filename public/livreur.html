@@ -26,6 +26,18 @@
             font-size: 1.8rem;
         }
 
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
         main {
             padding: 2rem;
             max-width: 800px;
@@ -111,13 +123,26 @@
             main {
                 padding: 1rem;
             }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .order {
+                padding: 0.8rem;
+            }
+
+            .map-button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Espace Livreur</h1>
-        <a href="./index.html" style="color: aliceblue;">ACCUEIL</a>
+        <a href="./index.html">ACCUEIL</a>
     </header>
     <main>
         <h2>Liste des Commandes à Livrer</h2>
@@ -214,7 +239,9 @@
                                 <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.clientAddress)}" target="_blank" class="map-button">
                                     Ouvrir dans Google Maps
                                 </a>
-                                
+                                <a href="https://www.waze.com/ul?ll=${order.clientAddress}&navigate=yes" target="_blank" class="map-button">
+                                    Ouvrir dans Waze
+                                </a>
                             </div>
 
                             <button class="mark-delivered-btn" data-id="${childSnapshot.key}">Marquer comme Livré</button>

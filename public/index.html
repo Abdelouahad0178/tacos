@@ -4,20 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAND TACOS - Gestion des Commandes</title>
+    <title>GRAND LUSTER- Gestion des Commandes</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
+        /* Styles globaux */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('images/lusters3.avif') center/cover;
+            color: white;
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
         /* Styles pour la modal */
         .modal {
-            display: none; /* Masqué par défaut */
+            display: none;
             position: fixed;
             z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Fond semi-transparent */
+            background-color: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
         }
@@ -29,10 +65,9 @@
             max-width: 500px;
             width: 90%;
             text-align: center;
-            position: relative; /* Pour positionner l'icône de fermeture */
+            position: relative;
         }
 
-        /* Styles pour l'icône de fermeture */
         .close-btn {
             position: absolute;
             top: 10px;
@@ -44,7 +79,7 @@
         }
 
         .close-btn:hover {
-            color: #ff5722; /* Changement de couleur au survol */
+            color: #ff5722;
         }
 
         /* Styles pour le slider */
@@ -53,7 +88,9 @@
             position: relative;
             width: 100%;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .slides {
@@ -68,39 +105,126 @@
         }
 
         .slide img {
-            max-width: 100%;
-            height: auto;
+            width: 100%;
+            max-height: 995px;
+            object-fit: cover;
             border-radius: 10px;
         }
 
         .slide h3 {
             margin-top: 10px;
-            font-size: 1.5em;
+            font-size: 1.5rem;
             color: #333;
         }
 
-        /* Styles pour le formulaire */
-        .address-input {
+        /* Styles pour les sections de produits */
+        section {
+            padding: 2rem;
+            background-color: white;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            text-align: center;
+            color: #ff5722;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 418px;
+            object-fit: cover;
+        }
+
+        .product-card h3 {
+            margin: 15px 0 10px;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .product-card p {
+            padding: 0 15px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .product-card strong {
+            display: block;
+            margin: 10px 0;
+            color: #ff5722;
+            font-size: 1.2rem;
+        }
+
+        /* Styles pour le formulaire de commande */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
         }
 
-        #loading-spinner {
-            display: none;
-            font-size: 1.2em;
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        #total-display-header {
-            position: fixed;
-            top: 10px;
-            right: 10px;
+        input, textarea {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
             background-color: #ff5722;
             color: white;
             padding: 10px;
+            font-size: 1rem;
+            border: none;
             border-radius: 5px;
-            font-size: 1.2em;
-            z-index: 1000;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e64a19;
+        }
+
+        #total-display {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #ff5722;
         }
 
         /* Styles pour la flèche de retour en haut */
@@ -114,12 +238,35 @@
             border-radius: 50%;
             font-size: 20px;
             cursor: pointer;
-            display: none; /* Masqué par défaut */
+            display: none;
             z-index: 1000;
         }
 
         #back-to-top:hover {
-            background-color: #e64a19; /* Changement de couleur au survol */
+            background-color: #e64a19;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .product-card img {
+                height: 362px;
+            }
+
+            section h2 {
+                font-size: 1.8rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .contact-info {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -136,55 +283,91 @@
     </div>
 
     <header>
-        <h1>GRAND TACOS</h1>
+        <h1>GRAND LUSTER</h1>
         <div class="contact-info">
             <a href="https://wa.me/212661112540" target="_blank">
-                <i class="fab fa-whatsapp" style="color: rgb(99, 240, 99); font-size: 20px;"></i> +212 6 61 11 25 40
+                <i class="fab fa-whatsapp"></i> +212 6 61 11 25 40
             </a>
             <a href="https://www.google.com/maps?q=GRAND+TACOS+Avenue+Principale+Casablanca" target="_blank">
-                <i class="fas fa-map-marker-alt" style="color: rgb(99, 240, 99); font-size: 20px;"></i> Avenue Principale, Casablanca
+                <i class="fas fa-map-marker-alt"></i> Avenue Principale, Casablanca
             </a>
-
             <a href="orders.html">
-                <i class="fas fa-shopping-cart" style="color: rgb(99, 240, 99); font-size: 16px;"></i> Ma Commande
+                <i class="fas fa-shopping-cart"></i> Ma Commande
             </a>
         </div>
     </header>
 
-    
-   <!-- Slider des produits -->
-<div class="slider">
-    <div class="slides">
-        <div class="slide" data-category="Classique">
-            <img src="images/TacosClassic.png" alt="Classique">
-            <h3>Classique - 50 DHS</h3>
-        </div>
-        <div class="slide" data-category="Géant">
-            <img src="images/TacosGeant.png" alt="Géant">
-            <h3>Géant - 80 DHS</h3>
-        </div>
-        <div class="slide" data-category="Végétarien">
-            <img src="images/TacosVegetal.png" alt="Végétarien">
-            <h3>Végétarien - 60 DHS</h3>
-        </div>
-        <div class="slide" data-category="Spécial">
-            <img src="images/TacosSpecial.png" alt="Spécial">
-            <h3>Spécial - 100 DHS</h3>
-        </div>
-        <div class="slide" data-category="Mexico">
-            <img src="images/tacosmexico.png" alt="Mexico">
-            <h3>Mexico - 120 DHS</h3>
-        </div>
-        <div class="slide" data-category="Margherita">
-            <img src="images/PizzaMargherita.jpg" alt="Margherita" style="width: 50%; height: 60%;">
-            <h3>Pizza Margherita - 120 DHS</h3>
+    <!-- Slider des produits -->
+    <div class="slider">
+        <div class="slides">
+            <div class="slide" data-category="Classique">
+                <img src="images/lusters1.jpg" alt="Classique">
+                <h3>Classique - 50 DHS</h3>
+            </div>
+            <div class="slide" data-category="Géant">
+                <img src="images/lusters2.avif" alt="Géant">
+                <h3>Géant - 80 DHS</h3>
+            </div>
+            <div class="slide" data-category="Cristal">
+                <img src="images/lusters3.avif" alt="Cristal">
+                <h3>Cristal - 60 DHS</h3>
+            </div>
+            <div class="slide" data-category="Spécial">
+                <img src="images/lusters4.avif" alt="Spécial">
+                <h3>Spécial - 100 DHS</h3>
+            </div>
         </div>
     </div>
-    <!-- Icônes de pagination -->
-    <div class="pagination">
-        <!-- Les icônes seront générées dynamiquement par JavaScript -->
-    </div>
-</div>
+
+    <!-- Section des Tacos -->
+    <section id="tacos-section">
+        <h2>Nos Arrivages</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <img src="images/lusters1.jpg" alt="Classique">
+                <h3>Classique</h3>
+                <p>Une luster classique Parfaite pour les amateurs de simplicité.</p>
+                <p><strong>Prix : 50 DHS</strong></p>
+            </div>
+            <div class="product-card">
+                <img src="images/lusters2.avif" alt="Géant">
+                <h3>Géant</h3>
+                <p>Notre luster géant est fait pour les grandes Maisons. Avec une double forme  et  il saura vous satisfaire.</p>
+                <p><strong>Prix : 80 DHS</strong></p>
+            </div>
+            <div class="product-card">
+                <img src="images/lusters3.avif" alt="Cristal">
+                <h3>Cristal</h3>
+                <p>Une luster raffiné de qualité supérieure, parfait pour ceux qui cherchent une expérience  unique.</p>
+                <p><strong>Prix : 60 DHS</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section des Boissons -->
+    <section id="boissons-section">
+        <h2>NOS PROMOTIONS</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <img src="images/lusters3.avif" alt="Cristal1">
+                <h3>Cristal1</h3>
+                <p>Une LUSTER magnifique pour  vos Salons. Parfaite pour équilibrer le Design.</p>
+                <p><strong>Prix : 10 DHS</strong></p>
+            </div>
+            <div class="product-card">
+                <img src="images/lusters4.avif" alt="Cristal4">
+                <h3>Cristal4</h3>
+                <p>Une luster légère et pétillante, idéale pour accompagner vos choix préférés.</p>
+                <p><strong>Prix : 15 DHS</strong></p>
+            </div>
+            <div class="product-card">
+                <img src="images/lusters1.jpg" alt="Cristal3">
+                <h3>Cristal3</h3>
+                <p>Une luster énergisante pour vous donner un coup de boost pendant votre repos.</p>
+                <p><strong>Prix : 20 DHS</strong></p>
+            </div>
+        </div>
+    </section>
 
     <!-- Formulaire de commande -->
     <main>
@@ -197,67 +380,51 @@
             <input type="tel" id="client-phone" required>
 
             <label for="client-address">Adresse :</label>
-            <div class="address-input">
-                <textarea id="client-address" rows="3" required></textarea>
-                <button type="button" id="get-location-btn">
-                    <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
-                </button>
-                <div id="loading-spinner" style="display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> Récupération de votre localisation...
-                </div>
-            </div>
+<div class="address-input">
+    <textarea id="client-address" rows="3" required></textarea>
+    <button type="button" id="get-location-btn">
+        <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
+    </button>
+    <div id="loading-spinner" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i> Récupération de votre localisation...
+    </div>
+</div>
 
-            <label>Tacos :</label>
+            <label>ARRIVAGE :</label>
             <div id="tacos-categories">
                 <div>
-                    <img src="images/TacosClassic.png" alt="Classique">
+                    <img src="images/lusters1.jpg" alt="Classique">
                     <label>Classique - 50 DHS</label>
                     <input type="number" class="tacos-quantity" data-category="Classique" min="0" value="0">
                 </div>
                 <div>
-                    <img src="images/TacosGeant.png" alt="Géant">
+                    <img src="images/lusters2.avif" alt="Géant">
                     <label>Géant - 80 DHS</label>
                     <input type="number" class="tacos-quantity" data-category="Géant" min="0" value="0">
                 </div>
                 <div>
-                    <img src="images/TacosVegetal.png" alt="Végétarien">
-                    <label>Végétarien - 60 DHS</label>
-                    <input type="number" class="tacos-quantity" data-category="Végétarien" min="0" value="0">
-                </div>
-                <div>
-                    <img src="images/TacosSpecial.png" alt="Spécial">
-                    <label>Spécial - 100 DHS</label>
-                    <input type="number" class="tacos-quantity" data-category="Spécial" min="0" value="0">
-                </div>
-                <div>
-                    <img src="images/tacosmexico.png" alt="Mexico">
-                    <label>Mexico - 120 DHS</label>
-                    <input type="number" class="tacos-quantity" data-category="Mexico" min="0" value="0">
-                </div>
-                <div>
-                    <img src="images/PizzaMargherita.jpg" alt="Margherita">
-                    <label>Margherita - 110 DHS</label>
-                    <input type="number" class="tacos-quantity" data-category="Margherita" min="0" value="0">
+                    <img src="images/lusters3.avif" alt="Cristal">
+                    <label>Cristal - 60 DHS</label>
+                    <input type="number" class="tacos-quantity" data-category="Cristal" min="0" value="0">
                 </div>
             </div>
 
-            <!-- Section des boissons -->
-            <label>Boissons :</label>
+            <label>PROMOTIONS :</label>
             <div id="boissons-list">
                 <div>
-                    <img src="images/boissons1.jpg" alt="Boisson1">
-                    <label>Boisson 1 - 10 DHS</label>
-                    <input type="number" class="boisson-quantity" data-category="Boisson1" min="0" value="0">
+                    <img src="images/lusters3.avif" alt="Cristal1">
+                    <label>Cristal1 - 10 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Cristal1" min="0" value="0">
                 </div>
                 <div>
-                    <img src="images/boisson2.jpg" alt="Boisson2">
-                    <label>Boisson 2 - 15 DHS</label>
-                    <input type="number" class="boisson-quantity" data-category="Boisson2" min="0" value="0">
+                    <img src="images/lusters4.avif" alt="Cristal4">
+                    <label>Cristal4 - 15 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Cristal4" min="0" value="0">
                 </div>
                 <div>
-                    <img src="images/boisson3.jpg" alt="Boisson3">
-                    <label>Boisson 3 - 20 DHS</label>
-                    <input type="number" class="boisson-quantity" data-category="Boisson3" min="0" value="0">
+                    <img src="images/lusters1.jpg" alt="Cristal3">
+                    <label>Cristal3 - 20 DHS</label>
+                    <input type="number" class="boisson-quantity" data-category="Cristal3" min="0" value="0">
                 </div>
             </div>
 
@@ -268,7 +435,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 GRAND TACOS - Tous droits réservés.</p>
+        <p>&copy; 2025 GRAND LUSTER - Tous droits réservés.</p>
         <p>
             Suivez-nous sur :
             <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
@@ -280,7 +447,7 @@
     <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span> <!-- Icône de fermeture -->
+            <span class="close-btn">&times;</span>
             <h2 id="modal-title"></h2>
             <p id="modal-description"></p>
             <img id="modal-image" src="" alt="Image de Tacos">
@@ -290,107 +457,6 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script type="module" src="./script.js"></script>
-
-    <!-- Intégration de l'API Google Maps -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const addressInput = document.getElementById('client-address');
-            const getLocationBtn = document.getElementById('get-location-btn');
-            const loadingSpinner = document.getElementById('loading-spinner');
-
-            // Fonction pour récupérer la localisation de l'utilisateur
-            getLocationBtn.addEventListener('click', () => {
-                if (navigator.geolocation) {
-                    // Afficher le spinner pendant la récupération
-                    loadingSpinner.style.display = 'block';
-                    addressInput.value = "";
-
-                    navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                            const { latitude, longitude } = position.coords;
-
-                            try {
-                                // Utiliser une variable d'environnement pour la clé API
-                                const apiKey = "AIzaSyBb7csOUmRUXI787W9c2q9EtYVOQPYtH2c"; // Remplacez par votre clé API
-                                const response = await fetch(
-                                    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
-                                );
-                                const data = await response.json();
-
-                                if (data.results && data.results[0]) {
-                                    addressInput.value = data.results[0].formatted_address;
-                                } else {
-                                    throw new Error("Aucune adresse trouvée.");
-                                }
-                            } catch (error) {
-                                console.error("Erreur :", error);
-                                alert("Impossible de récupérer l'adresse. Veuillez la saisir manuellement.");
-                            } finally {
-                                // Masquer le spinner
-                                loadingSpinner.style.display = 'none';
-                            }
-                        },
-                        (error) => {
-                            console.error("Erreur de géolocalisation :", error);
-                            alert("Vous devez autoriser l'accès à votre localisation pour utiliser cette fonctionnalité.");
-                            loadingSpinner.style.display = 'none';
-                        }
-                    );
-                } else {
-                    alert("La géolocalisation n'est pas supportée par votre navigateur.");
-                }
-            });
-
-            // Gestion de la modal
-            const modal = document.getElementById('modal');
-            const closeBtn = document.querySelector('.close-btn');
-
-            // Fermer la modal lorsque l'utilisateur clique sur l'icône de fermeture
-            closeBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            // Fermer la modal si l'utilisateur clique en dehors de celle-ci
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            // Ouvrir la modal lorsqu'une image du slider est cliquée
-            const slides = document.querySelectorAll('.slide');
-            slides.forEach(slide => {
-                slide.addEventListener('click', () => {
-                    const imageSrc = slide.querySelector('img').src;
-                    const title = slide.querySelector('h3').textContent;
-
-                    document.getElementById('modal-image').src = imageSrc;
-                    document.getElementById('modal-title').textContent = title;
-                    modal.style.display = 'flex'; // Afficher la modal
-                });
-            });
-
-            // Gestion de la flèche de retour en haut
-            const backToTopBtn = document.getElementById('back-to-top');
-
-            // Afficher ou masquer la flèche en fonction du défilement
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) {
-                    backToTopBtn.style.display = 'block';
-                } else {
-                    backToTopBtn.style.display = 'none';
-                }
-            });
-
-            // Faire défiler la page vers le haut lorsque l'utilisateur clique sur la flèche
-            backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth' // Défilement fluide
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>

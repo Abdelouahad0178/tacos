@@ -1,314 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Interne des Commandes</title>
+    <title>Gestion Interne des Commandes - GRAND TACOS</title>
+    <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
-        import { getDatabase, ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdp0QPxkC2TSpd5zVComDmxNOlZy5jSt0",
-            authDomain: "mariajob01.firebaseapp.com",
-            databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
-            projectId: "mariajob01",
-            storageBucket: "mariajob01.appspot.com",
-            messagingSenderId: "253374710047",
-            appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
-            measurementId: "G-79642QZTTM"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Liste des commerciaux
-        const commerciaux = [
-            { name: "yassine", phone: "0612345678" },
-            { name: "ilyass", phone: "0623456789" },
-            { name: "rachid", phone: "0634567890" }
-        ];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const ordersContainer = document.getElementById('orders-container');
-            const summaryContainer = document.getElementById('summary-container');
-            const livreurSalesContainer = document.getElementById('livreur-sales-container');
-            const startDateInput = document.getElementById('start-date');
-            const endDateInput = document.getElementById('end-date');
-            const today = new Date();
-            let lastOrderCount = 0; // Pour détecter les nouvelles commandes
-
-            const formatDate = (date) => {
-                const yyyy = date.getFullYear();
-                const mm = String(date.getMonth() + 1).padStart(2, '0');
-                const dd = String(date.getDate()).padStart(2, '0');
-                return `${yyyy}-${mm}-${dd}`;
-            };
-
-            const todayString = formatDate(today);
-            startDateInput.value = todayString;
-            endDateInput.value = todayString;
-
-            // Jouer un son de bip
-            const playBeep = () => {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                oscillator.type = 'sine'; // Type d'onde sonore
-                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Fréquence en Hz
-                oscillator.connect(audioContext.destination);
-                oscillator.start();
-                setTimeout(() => oscillator.stop(), 500); // Arrêter après 500ms
-            };
-
-            const loadOrders = () => {
-                ordersContainer.innerHTML = '';
-                const startTime = new Date(startDateInput.value).getTime();
-                const endTime = new Date(endDateInput.value).setHours(23, 59, 59, 999);
-
-                onValue(ref(db, 'orders'), (snapshot) => {
-                    ordersContainer.innerHTML = ''; // Effacer les commandes pour éviter les doublons
-                    let orderCount = 0;
-
-                    snapshot.forEach((childSnapshot) => {
-                        const order = childSnapshot.val();
-                        const orderTimestamp = order.timestamp || 0;
-
-                        if (orderTimestamp >= startTime && orderTimestamp <= endTime) {
-                            orderCount++;
-                            let tacosDetails = '';
-                            let boissonsDetails = '';
-
-                            // Afficher les tacos
-                            if (order.tacos && Array.isArray(order.tacos)) {
-                                order.tacos.forEach(taco => {
-                                    tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
-                                });
-                            }
-
-                            // Afficher les boissons
-                            if (order.boissons && Array.isArray(order.boissons)) {
-                                order.boissons.forEach(boisson => {
-                                    boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
-                                });
-                            }
-
-                            const div = document.createElement('div');
-                            div.classList.add('order');
-                            div.innerHTML = `
-                                <p><strong>Nom:</strong> ${order.clientName}</p>
-                                <p><strong>N° téléphone:</strong> ${order.clientPhone}</p>
-                                <p><strong>Adresse:</strong> ${order.clientAddress}</p>
-                                ${tacosDetails}
-                                ${boissonsDetails}
-                                <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
-                                <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString() || 'Non spécifiée'}</p>
-                                <p ><strong style="color: green;">Statut:</strong>
-                                    <label><input type="radio" name="status-${childSnapshot.key}" value="Accepté" ${order.orderStatus === 'Accepté' ? 'checked' : ''}> Accepté</label>
-                                    <label><input type="radio" name="status-${childSnapshot.key}" value="livré" ${order.orderStatus === 'livré' ? 'checked' : ''}> Livré</label>
-                                    <label><input type="radio" name="status-${childSnapshot.key}" value="annulé" ${order.orderStatus === 'annulé' ? 'checked' : ''}> Annulé</label>
-                                </p>
-                                <p><strong>Livreur:</strong>
-                                    <select class="commercial-select" data-id="${childSnapshot.key}">
-                                        ${commerciaux.map(com => `
-                                            <option value="${com.phone}" ${order.commercialPhone === com.phone ? 'selected' : ''}>${com.name}</option>
-                                        `).join('')}
-                                    </select>
-                                </p>
-                                <button class="delete-btn" data-id="${childSnapshot.key}">Supprimer</button>
-                            `;
-                            ordersContainer.appendChild(div);
-
-                            // Mise à jour automatique du statut
-                            div.querySelectorAll(`input[name="status-${childSnapshot.key}"]`).forEach(radio => {
-                                radio.addEventListener('change', () => {
-                                    const newStatus = document.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
-                                    const commercialSelect = div.querySelector('.commercial-select');
-                                    const commercialPhone = commercialSelect.value;
-
-                                    // Mettre à jour le statut et le livreur dans Firebase
-                                    update(ref(db, `orders/${childSnapshot.key}`), { 
-                                        orderStatus: newStatus,
-                                        commercialPhone: commercialPhone
-                                    }).then(() => {
-                                        console.log('Statut et livreur mis à jour');
-                                        updateSalesSummary();
-                                    });
-                                });
-                            });
-
-                            // Mise à jour du livreur sélectionné
-                            div.querySelector('.commercial-select').addEventListener('change', (e) => {
-                                const commercialPhone = e.target.value;
-                                const status = div.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
-
-                                // Mettre à jour le livreur dans Firebase
-                                update(ref(db, `orders/${childSnapshot.key}`), { 
-                                    commercialPhone: commercialPhone,
-                                    orderStatus: status // Conserver le statut actuel
-                                }).then(() => {
-                                    console.log('Livreur mis à jour');
-                                });
-                            });
-
-                            // Supprimer la commande
-                            div.querySelector('.delete-btn').addEventListener('click', () => {
-                                const orderId = childSnapshot.key;
-                                if (confirm(`Voulez-vous vraiment supprimer cette commande (ID: ${orderId}) ?`)) {
-                                    remove(ref(db, `orders/${orderId}`))
-                                        .then(() => {
-                                            console.log(`Commande ${orderId} supprimée.`);
-                                            updateSalesSummary();
-                                        })
-                                        .catch((error) => {
-                                            console.error(`Erreur lors de la suppression : ${error}`);
-                                        });
-                                }
-                            });
-                        }
-                    });
-
-                    // Vérifier les nouvelles commandes
-                    if (orderCount > lastOrderCount) {
-                        playBeep(); // Jouer un son de bip
-                    }
-                    lastOrderCount = orderCount;
-                });
-            };
-
-            const updateSalesSummary = () => {
-                const startTime = new Date(startDateInput.value).getTime();
-                const endTime = new Date(endDateInput.value).setHours(23, 59, 59, 999);
-
-                onValue(ref(db, 'orders'), (snapshot) => {
-                    let totalSales = 0;
-                    const tacoSales = {};
-                    const boissonSales = {};
-                    const livreurSales = {};
-
-                    snapshot.forEach((childSnapshot) => {
-                        const order = childSnapshot.val();
-                        const orderTimestamp = order.timestamp || 0;
-
-                        if (orderTimestamp >= startTime && orderTimestamp <= endTime && order.orderStatus === "livré") {
-                            totalSales += order.total || 0;
-
-                            // Calcul des ventes de tacos
-                            if (order.tacos && Array.isArray(order.tacos)) {
-                                order.tacos.forEach(taco => {
-                                    if (!tacoSales[taco.category]) {
-                                        tacoSales[taco.category] = 0;
-                                    }
-                                    tacoSales[taco.category] += taco.quantity;
-                                });
-                            }
-
-                            // Calcul des ventes de boissons
-                            if (order.boissons && Array.isArray(order.boissons)) {
-                                order.boissons.forEach(boisson => {
-                                    if (!boissonSales[boisson.category]) {
-                                        boissonSales[boisson.category] = 0;
-                                    }
-                                    boissonSales[boisson.category] += boisson.quantity;
-                                });
-                            }
-
-                            // Calcul des ventes par livreur
-                            const livreur = commerciaux.find(com => com.phone === order.commercialPhone);
-                            if (livreur) {
-                                if (!livreurSales[livreur.name]) {
-                                    livreurSales[livreur.name] = {
-                                        total: 0,
-                                        tacos: {},
-                                        boissons: {}
-                                    };
-                                }
-                                livreurSales[livreur.name].total += order.total || 0;
-
-                                // Ventes de tacos par livreur
-                                if (order.tacos) {
-                                    order.tacos.forEach(taco => {
-                                        if (!livreurSales[livreur.name].tacos[taco.category]) {
-                                            livreurSales[livreur.name].tacos[taco.category] = 0;
-                                        }
-                                        livreurSales[livreur.name].tacos[taco.category] += taco.quantity;
-                                    });
-                                }
-
-                                // Ventes de boissons par livreur
-                                if (order.boissons) {
-                                    order.boissons.forEach(boisson => {
-                                        if (!livreurSales[livreur.name].boissons[boisson.category]) {
-                                            livreurSales[livreur.name].boissons[boisson.category] = 0;
-                                        }
-                                        livreurSales[livreur.name].boissons[boisson.category] += boisson.quantity;
-                                    });
-                                }
-                            }
-                        }
-                    });
-
-                    // Afficher le résumé des ventes par livreur
-                    let livreurSalesHTML = '<table class="sales-summary"><thead><tr><th>Livreur</th><th>Catégorie</th><th>Quantité</th><th>Montant</th></tr></thead><tbody>';
-                    let grandTotal = 0;
-
-                    for (const [livreurName, data] of Object.entries(livreurSales)) {
-                        livreurSalesHTML += `<tr><td rowspan="${Object.keys(data.tacos).length + Object.keys(data.boissons).length}">${livreurName}</td>`;
-                        let firstRow = true;
-
-                        // Afficher les tacos
-                        for (const [category, quantity] of Object.entries(data.tacos)) {
-                            if (!firstRow) {
-                                livreurSalesHTML += `<tr>`;
-                            }
-                            livreurSalesHTML += `
-                                <td>${category}</td>
-                                <td>${quantity}</td>
-                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
-                            </tr>`;
-                            firstRow = false;
-                        }
-
-                        // Afficher les boissons
-                        for (const [category, quantity] of Object.entries(data.boissons)) {
-                            if (!firstRow) {
-                                livreurSalesHTML += `<tr>`;
-                            }
-                            livreurSalesHTML += `
-                                <td>${category}</td>
-                                <td>${quantity}</td>
-                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
-                            </tr>`;
-                            firstRow = false;
-                        }
-                        grandTotal += data.total;
-                    }
-
-                    livreurSalesHTML += `<tr><td colspan="3"><strong>Grand Total</strong></td><td><strong>${grandTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</strong></td></tr>`;
-                    livreurSalesHTML += '</tbody></table>';
-
-                    livreurSalesContainer.innerHTML = `
-                        <h2>Ventes par Livreur</h2>
-                        ${livreurSalesHTML}
-                    `;
-                });
-            };
-
-            startDateInput.addEventListener('change', () => {
-                loadOrders();
-                updateSalesSummary();
-            });
-            endDateInput.addEventListener('change', () => {
-                loadOrders();
-                updateSalesSummary();
-            });
-
-            // Chargement initial
-            loadOrders();
-            updateSalesSummary();
-        });
-    </script>
     <style>
+        /* Styles globaux */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -336,23 +35,6 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .sales-summary {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
-
-        .sales-summary th, .sales-summary td {
-            border: 1px solid #ddd;
-            padding: 0.5rem;
-            text-align: left;
-        }
-
-        .sales-summary th {
-            background-color: #ff5722;
-            color: white;
         }
 
         .filters {
@@ -387,9 +69,13 @@
             cursor: pointer;
         }
 
-        .update-btn {
-            background-color: #ffc107;
+        .mark-delivered-btn {
+            background-color: #28a745;
             color: white;
+        }
+
+        .mark-delivered-btn:hover {
+            background-color: #218838;
         }
 
         .delete-btn {
@@ -397,43 +83,52 @@
             color: white;
         }
 
-        button:hover {
-            opacity: 0.9;
+        .delete-btn:hover {
+            background-color: #c82333;
         }
 
-        /* Footer */
+        .sales-summary {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .sales-summary th, .sales-summary td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .sales-summary th {
+            background-color: #ff5722;
+            color: white;
+        }
+
         footer {
             background-color: #ff5722;
-            color: #fff;
+            color: white;
             text-align: center;
-            padding: 20px 10px;
-            font-family: 'Arial', sans-serif;
-            font-size: 14px;
+            padding: 1rem;
+            margin-top: 2rem;
         }
 
         footer p {
+            margin: 0;
+        }
+
+        /* Styles pour aligner les boutons radio du statut */
+        .order .status-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             margin: 10px 0;
         }
 
-        footer a {
-            color: #fff;
-            margin: 0 10px;
-            text-decoration: none;
-            font-size: 18px;
-            transition: color 0.3s ease;
-        }
-
-        footer a:hover {
-            color: #844b3e;
-        }
-
-        footer a i {
-            vertical-align: middle;
-        }
-
-        footer p:last-child {
-            margin-top: 15px;
-            font-size: 16px;
+        .order .status-container label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
@@ -441,16 +136,26 @@
                 padding: 1rem;
             }
 
-            .sales-summary th, .sales-summary td {
-                font-size: 0.9rem;
-                padding: 0.4rem;
+            .filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filters input {
+                margin: 0.5rem 0;
+            }
+
+            .order .status-container {
+                flex-direction: column;
+                gap: 5px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Page de Gestion Interne</h1>
+        <h1>Gestion Interne des Commandes</h1>
+        <a href="./index.html" style="color: aliceblue;">ACCUEIL</a>
     </header>
 
     <main>
@@ -461,20 +166,316 @@
             <label for="end-date">Date de fin :</label>
             <input type="date" id="end-date">
         </div>
-        <div id="orders-container"></div>
+        <div id="orders-container">
+            <p>Chargement des commandes...</p>
+        </div>
+
         <h2>Résumé des Ventes</h2>
-        <div id="summary-container"></div>
-        <div id="livreur-sales-container"></div>
+        <div id="summary-container">
+            <p>Chargement du résumé des ventes...</p>
+        </div>
+
+        <h2>Ventes par Livreur</h2>
+        <div id="livreur-sales-container">
+            <p>Chargement des ventes par livreur...</p>
+        </div>
     </main>
 
     <footer>
         <p>&copy; 2025 GRAND TACOS - Tous droits réservés.</p>
-        <p>
-            Suivez-nous sur :
-            <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
-            <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-            <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
-        </p>
     </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js';
+        import { getDatabase, ref, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdp0QPxkC2TSpd5zVComDmxNOlZy5jSt0",
+            authDomain: "mariajob01.firebaseapp.com",
+            databaseURL: "https://mariajob01-default-rtdb.firebaseio.com",
+            projectId: "mariajob01",
+            storageBucket: "mariajob01.appspot.com",
+            messagingSenderId: "253374710047",
+            appId: "1:253374710047:web:ac7dbb30d2019ae69e702a",
+            measurementId: "G-79642QZTTM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Liste des livreurs
+        const livreurs = [
+            { name: "Yassine", phone: "0612345678" },
+            { name: "Ilyass", phone: "0623456789" },
+            { name: "Rachid", phone: "0634567890" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ordersContainer = document.getElementById('orders-container');
+            const summaryContainer = document.getElementById('summary-container');
+            const livreurSalesContainer = document.getElementById('livreur-sales-container');
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+
+            const today = new Date();
+            const formatDate = (date) => {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            };
+
+            startDateInput.value = formatDate(today);
+            endDateInput.value = formatDate(today);
+
+            const loadOrders = () => {
+                ordersContainer.innerHTML = '';
+                const startTime = new Date(startDateInput.value).getTime();
+                const endTime = new Date(endDateInput.value).setHours(23, 59, 59, 999);
+
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    ordersContainer.innerHTML = '';
+                    let orderCount = 0;
+
+                    snapshot.forEach((childSnapshot) => {
+                        const order = childSnapshot.val();
+                        const orderTimestamp = order.timestamp || 0;
+
+                        if (orderTimestamp >= startTime && orderTimestamp <= endTime) {
+                            orderCount++;
+                            let tacosDetails = '';
+                            let boissonsDetails = '';
+
+                            if (order.tacos && Array.isArray(order.tacos)) {
+                                order.tacos.forEach(taco => {
+                                    tacosDetails += `<p><strong>${taco.category}:</strong> ${taco.quantity}</p>`;
+                                });
+                            }
+
+                            if (order.boissons && Array.isArray(order.boissons)) {
+                                order.boissons.forEach(boisson => {
+                                    boissonsDetails += `<p><strong>${boisson.category}:</strong> ${boisson.quantity}</p>`;
+                                });
+                            }
+
+                            const div = document.createElement('div');
+                            div.classList.add('order');
+                            div.innerHTML = `
+                                <p><strong>Nom:</strong> ${order.clientName}</p>
+                                <p><strong>Téléphone:</strong> ${order.clientPhone}</p>
+                                <p><strong>Adresse:</strong> ${order.clientAddress}</p>
+                                ${tacosDetails}
+                                ${boissonsDetails}
+                                <p><strong>Total:</strong> ${order.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</p>
+                                <p><strong>Date & Heure:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                                <p><strong>Statut:</strong></p>
+                                <div class="status-container">
+                                    <label><input type="radio" name="status-${childSnapshot.key}" value="Accepté" ${order.orderStatus === 'Accepté' ? 'checked' : ''}> Accepté</label>
+                                    <label><input type="radio" name="status-${childSnapshot.key}" value="livré" ${order.orderStatus === 'livré' ? 'checked' : ''}> Livré</label>
+                                    <label><input type="radio" name="status-${childSnapshot.key}" value="annulé" ${order.orderStatus === 'annulé' ? 'checked' : ''}> Annulé</label>
+                                </div>
+                                <p><strong>Livreur:</strong>
+                                    <select class="livreur-select" data-id="${childSnapshot.key}">
+                                        ${livreurs.map(livreur => `
+                                            <option value="${livreur.phone}" ${order.commercialPhone === livreur.phone ? 'selected' : ''}>${livreur.name}</option>
+                                        `).join('')}
+                                    </select>
+                                </p>
+                                <button class="delete-btn" data-id="${childSnapshot.key}">Supprimer</button>
+                            `;
+                            ordersContainer.appendChild(div);
+
+                            // Mise à jour du statut
+                            div.querySelectorAll(`input[name="status-${childSnapshot.key}"]`).forEach(radio => {
+                                radio.addEventListener('change', () => {
+                                    const newStatus = document.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
+                                    const livreurSelect = div.querySelector('.livreur-select');
+                                    const livreurPhone = livreurSelect.value;
+
+                                    update(ref(db, `orders/${childSnapshot.key}`), {
+                                        orderStatus: newStatus,
+                                        commercialPhone: livreurPhone
+                                    }).then(() => {
+                                        console.log('Statut et livreur mis à jour');
+                                        updateSalesSummary();
+                                    });
+                                });
+                            });
+
+                            // Mise à jour du livreur
+                            div.querySelector('.livreur-select').addEventListener('change', (e) => {
+                                const livreurPhone = e.target.value;
+                                const status = div.querySelector(`input[name="status-${childSnapshot.key}"]:checked`).value;
+
+                                update(ref(db, `orders/${childSnapshot.key}`), {
+                                    commercialPhone: livreurPhone,
+                                    orderStatus: status
+                                }).then(() => {
+                                    console.log('Livreur mis à jour');
+                                });
+                            });
+
+                            // Supprimer la commande
+                            div.querySelector('.delete-btn').addEventListener('click', () => {
+                                const orderId = childSnapshot.key;
+                                if (confirm(`Voulez-vous vraiment supprimer cette commande (ID: ${orderId}) ?`)) {
+                                    remove(ref(db, `orders/${orderId}`))
+                                        .then(() => {
+                                            console.log(`Commande ${orderId} supprimée.`);
+                                            updateSalesSummary();
+                                        })
+                                        .catch((error) => {
+                                            console.error(`Erreur lors de la suppression : ${error}`);
+                                        });
+                                }
+                            });
+                        }
+                    });
+
+                    if (orderCount === 0) {
+                        ordersContainer.innerHTML = '<p>Aucune commande trouvée pour cette période.</p>';
+                    }
+                });
+            };
+
+            const updateSalesSummary = () => {
+                const startTime = new Date(startDateInput.value).getTime();
+                const endTime = new Date(endDateInput.value).setHours(23, 59, 59, 999);
+
+                onValue(ref(db, 'orders'), (snapshot) => {
+                    let totalSales = 0;
+                    const tacoSales = {};
+                    const boissonSales = {};
+                    const livreurSales = {};
+
+                    snapshot.forEach((childSnapshot) => {
+                        const order = childSnapshot.val();
+                        const orderTimestamp = order.timestamp || 0;
+
+                        if (orderTimestamp >= startTime && orderTimestamp <= endTime && order.orderStatus === "livré") {
+                            totalSales += order.total || 0;
+
+                            if (order.tacos && Array.isArray(order.tacos)) {
+                                order.tacos.forEach(taco => {
+                                    if (!tacoSales[taco.category]) {
+                                        tacoSales[taco.category] = 0;
+                                    }
+                                    tacoSales[taco.category] += taco.quantity;
+                                });
+                            }
+
+                            if (order.boissons && Array.isArray(order.boissons)) {
+                                order.boissons.forEach(boisson => {
+                                    if (!boissonSales[boisson.category]) {
+                                        boissonSales[boisson.category] = 0;
+                                    }
+                                    boissonSales[boisson.category] += boisson.quantity;
+                                });
+                            }
+
+                            const livreur = livreurs.find(l => l.phone === order.commercialPhone);
+                            if (livreur) {
+                                if (!livreurSales[livreur.name]) {
+                                    livreurSales[livreur.name] = {
+                                        total: 0,
+                                        tacos: {},
+                                        boissons: {}
+                                    };
+                                }
+                                livreurSales[livreur.name].total += order.total || 0;
+
+                                if (order.tacos) {
+                                    order.tacos.forEach(taco => {
+                                        if (!livreurSales[livreur.name].tacos[taco.category]) {
+                                            livreurSales[livreur.name].tacos[taco.category] = 0;
+                                        }
+                                        livreurSales[livreur.name].tacos[taco.category] += taco.quantity;
+                                    });
+                                }
+
+                                if (order.boissons) {
+                                    order.boissons.forEach(boisson => {
+                                        if (!livreurSales[livreur.name].boissons[boisson.category]) {
+                                            livreurSales[livreur.name].boissons[boisson.category] = 0;
+                                        }
+                                        livreurSales[livreur.name].boissons[boisson.category] += boisson.quantity;
+                                    });
+                                }
+                            }
+                        }
+                    });
+
+                    // Afficher le résumé des ventes
+                    summaryContainer.innerHTML = `
+                        <h3>Total des ventes : ${totalSales.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</h3>
+                        <h4>Ventes de Tacos</h4>
+                        <ul>
+                            ${Object.entries(tacoSales).map(([category, quantity]) => `<li>${category}: ${quantity}</li>`).join('')}
+                        </ul>
+                        <h4>Ventes de Boissons</h4>
+                        <ul>
+                            ${Object.entries(boissonSales).map(([category, quantity]) => `<li>${category}: ${quantity}</li>`).join('')}
+                        </ul>
+                    `;
+
+                    // Afficher les ventes par livreur
+                    let livreurSalesHTML = '<table class="sales-summary"><thead><tr><th>Livreur</th><th>Catégorie</th><th>Quantité</th><th>Montant</th></tr></thead><tbody>';
+                    let grandTotal = 0;
+
+                    for (const [livreurName, data] of Object.entries(livreurSales)) {
+                        livreurSalesHTML += `<tr><td rowspan="${Object.keys(data.tacos).length + Object.keys(data.boissons).length}">${livreurName}</td>`;
+                        let firstRow = true;
+
+                        for (const [category, quantity] of Object.entries(data.tacos)) {
+                            if (!firstRow) {
+                                livreurSalesHTML += `<tr>`;
+                            }
+                            livreurSalesHTML += `
+                                <td>${category}</td>
+                                <td>${quantity}</td>
+                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
+                            </tr>`;
+                            firstRow = false;
+                        }
+
+                        for (const [category, quantity] of Object.entries(data.boissons)) {
+                            if (!firstRow) {
+                                livreurSalesHTML += `<tr>`;
+                            }
+                            livreurSalesHTML += `
+                                <td>${category}</td>
+                                <td>${quantity}</td>
+                                <td>${firstRow ? data.total.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' }) : ''}</td>
+                            </tr>`;
+                            firstRow = false;
+                        }
+                        grandTotal += data.total;
+                    }
+
+                    livreurSalesHTML += `<tr><td colspan="3"><strong>Grand Total</strong></td><td><strong>${grandTotal.toLocaleString('fr-FR', { style: 'currency', currency: 'MAD' })}</strong></td></tr>`;
+                    livreurSalesHTML += '</tbody></table>';
+
+                    livreurSalesContainer.innerHTML = `
+                        <h3>Ventes par Livreur</h3>
+                        ${livreurSalesHTML}
+                    `;
+                });
+            };
+
+            startDateInput.addEventListener('change', () => {
+                loadOrders();
+                updateSalesSummary();
+            });
+
+            endDateInput.addEventListener('change', () => {
+                loadOrders();
+                updateSalesSummary();
+            });
+
+            // Chargement initial
+            loadOrders();
+            updateSalesSummary();
+        });
+    </script>
 </body>
 </html>
