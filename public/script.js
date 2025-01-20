@@ -41,15 +41,15 @@ const openModal = (category) => {
 
 // Fonction pour calculer le total
 const prices = {
-    'Classique': 50,
-    'Géant': 80,
-    'Cristal': 60,
-    'Spécial': 100,
-    'Mexico': 120,
-    'Margherita': 110,
-    'Cristal1': 10,
-    'Cristal4': 15,
-    'Cristal3': 20
+    'Classique': 350,
+    'Géant': 380,
+    'Cristal': 360,
+    'Spécial': 300,
+    'Mexico': 320,
+    'Margherita': 310,
+    'Cristal1': 310,
+    'Cristal4': 315,
+    'Cristal3': 320
 };
 
 const updateTotal = () => {

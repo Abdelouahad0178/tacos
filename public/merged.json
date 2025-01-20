@@ -1,0 +1,54 @@
+{
+    "products": [
+      {
+        "id": "classique",
+        "name": "Classique",
+        "description": "Un Lustre classique Parfaite pour les amateurs de simplicité.",
+        "price": 350,
+        "image": "images/lusters1.jpg"
+      },
+      {
+        "id": "geant",
+        "name": "Géant",
+        "description": "Notre Lustre géant est fait pour les grandes Maisons. Avec une double forme et il saura vous satisfaire.",
+        "price": 380,
+        "image": "images/lusters2.avif"
+      },
+      {
+        "id": "cristal",
+        "name": "Cristal",
+        "description": "Un Lustre raffiné de qualité supérieure, parfait pour ceux qui cherchent une expérience unique.",
+        "price": 360,
+        "image": "images/lusters3.avif"
+      }
+    ],
+    "promotions": [
+      {
+        "id": "cristal1",
+        "name": "Cristal1",
+        "description": "Un Lustre magnifique pour vos Salons. Parfaite pour équilibrer le Design.",
+        "price": 310,
+        "image": "images/lusters3.avif"
+      },
+      {
+        "id": "cristal4",
+        "name": "Cristal4",
+        "description": "Un Lustre légère et pétillante, idéale pour accompagner vos choix préférés.",
+        "price": 315,
+        "image": "images/lusters4.avif"
+      },
+      {
+        "id": "cristal3",
+        "name": "Cristal3",
+        "description": "Un Lustre énergisante pour vous donner un coup de boost pendant votre repos.",
+        "price": 320,
+        "image": "images/lusters1.jpg"
+      }
+    ],
+    "gallery": [
+      "images/lusters1.jpg",
+      "images/lusters2.avif",
+      "images/lusters3.avif",
+      "images/lusters4.avif"
+    ]
+  }

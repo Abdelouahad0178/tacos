@@ -4,367 +4,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAND LUSTER- Gestion des Commandes</title>
+    <title>GRAND Lustre - Gestion des Commandes</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Styles globaux */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
+    
 
-        header {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('images/lusters3.avif') center/cover;
-            color: white;
-            text-align: center;
-            padding: 100px 20px;
-        }
 
-        header h1 {
-            font-size: 3rem;
-            margin: 0;
-        }
-
-        .contact-info {
-            margin-top: 20px;
-            font-size: 1.2rem;
-        }
-
-        .contact-info a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-
-        .contact-info a:hover {
-            text-decoration: underline;
-        }
-
-        /* Styles pour la modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #333;
-        }
-
-        .close-btn:hover {
-            color: #ff5722;
-        }
-
-        /* Styles pour le slider */
-        .slider {
-            overflow: hidden;
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .slides {
-            display: flex;
-            transition: transform 0.5s ease-in-out;
-        }
-
-        .slide {
-            min-width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .slide img {
-            width: 100%;
-            max-height: 995px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        .slide h3 {
-            margin-top: 10px;
-            font-size: 1.5rem;
-            color: #333;
-        }
-
-        /* Styles pour les sections de produits */
-        section {
-            padding: 2rem;
-            background-color: white;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        section h2 {
-            text-align: center;
-            color: #ff5722;
-            margin-bottom: 20px;
-            font-size: 2rem;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 418px;
-            object-fit: cover;
-        }
-
-        .product-card h3 {
-            margin: 15px 0 10px;
-            font-size: 1.5rem;
-            color: #333;
-        }
-
-        .product-card p {
-            padding: 0 15px;
-            color: #666;
-            font-size: 1rem;
-        }
-
-        .product-card strong {
-            display: block;
-            margin: 10px 0;
-            color: #ff5722;
-            font-size: 1.2rem;
-        }
-
-        /* Styles pour le formulaire de commande */
-        main {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input, textarea {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        button {
-            background-color: #ff5722;
-            color: white;
-            padding: 10px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #e64a19;
-        }
-
-        #total-display {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-top: 20px;
-            color: #ff5722;
-        }
-
-        /* Styles pour la flèche de retour en haut */
-        #back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #ff5722;
-            color: white;
-            padding: 10px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            display: none;
-            z-index: 1000;
-        }
-
-        #back-to-top:hover {
-            background-color: #e64a19;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .product-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-
-            .product-card img {
-                height: 362px;
-            }
-
-            section h2 {
-                font-size: 1.8rem;
-            }
-
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .contact-info {
-                font-size: 1rem;
-            }
-        }
-    </style>
 </head>
 
 <body>
     <!-- Total à payer en haut à droite -->
     <div id="total-display-header">
         Total à payer : 0 DHS
+
     </div>
 
+    
     <!-- Flèche de retour en haut -->
     <div id="back-to-top">
         <i class="fas fa-arrow-up"></i>
     </div>
 
     <header>
-        <h1>GRAND LUSTER</h1>
+        <h1>GRAND LUSTRE</h1>
         <div class="contact-info">
             <a href="https://wa.me/212661112540" target="_blank">
-                <i class="fab fa-whatsapp"></i> +212 6 61 11 25 40
+                <i class="fab fa-whatsapp" style="color: green; font-size: 24px; font-weight: 700;"></i> +212 6 61 11 25 40
             </a>
             <a href="https://www.google.com/maps?q=GRAND+TACOS+Avenue+Principale+Casablanca" target="_blank">
-                <i class="fas fa-map-marker-alt"></i> Avenue Principale, Casablanca
+                <i class="fas fa-map-marker-alt" style="color: green; font-size: 16px; font-weight: 600;"></i> Avenue Principale, Casablanca
             </a>
             <a href="orders.html">
-                <i class="fas fa-shopping-cart"></i> Ma Commande
+                <i class="fas fa-shopping-cart" style="color: green; font-size: 16px; font-weight: 600;"></i> Ma Commande
             </a>
+
+
+<!-- Bouton de bascule entre les modes -->
+<button id="theme-toggle">
+    <i class="fas fa-moon" style="color: green; font-size: 30px; font-weight: 900;"></i> 
+</button>
+
+
+
+
         </div>
     </header>
 
+
+
+
+
     <!-- Slider des produits -->
     <div class="slider">
+
         <div class="slides">
             <div class="slide" data-category="Classique">
                 <img src="images/lusters1.jpg" alt="Classique">
-                <h3>Classique - 50 DHS</h3>
+                <h3>Classique - 350 DHS</h3>
             </div>
             <div class="slide" data-category="Géant">
                 <img src="images/lusters2.avif" alt="Géant">
-                <h3>Géant - 80 DHS</h3>
+                <h3>Géant - 380 DHS</h3>
             </div>
             <div class="slide" data-category="Cristal">
                 <img src="images/lusters3.avif" alt="Cristal">
-                <h3>Cristal - 60 DHS</h3>
+                <h3>Cristal - 360 DHS</h3>
             </div>
             <div class="slide" data-category="Spécial">
                 <img src="images/lusters4.avif" alt="Spécial">
-                <h3>Spécial - 100 DHS</h3>
+                <h3>Spécial - 300 DHS</h3>
             </div>
         </div>
     </div>
 
-    <!-- Section des Tacos -->
+    <!-- Section des Arrivages -->
     <section id="tacos-section">
         <h2>Nos Arrivages</h2>
         <div class="product-grid">
             <div class="product-card">
                 <img src="images/lusters1.jpg" alt="Classique">
                 <h3>Classique</h3>
-                <p>Une luster classique Parfaite pour les amateurs de simplicité.</p>
-                <p><strong>Prix : 50 DHS</strong></p>
+                <p>Un Lustre classique Parfaite pour les amateurs de simplicité.</p>
+                <p><strong>Prix : 350 DHS</strong></p>
             </div>
             <div class="product-card">
                 <img src="images/lusters2.avif" alt="Géant">
                 <h3>Géant</h3>
-                <p>Notre luster géant est fait pour les grandes Maisons. Avec une double forme  et  il saura vous satisfaire.</p>
-                <p><strong>Prix : 80 DHS</strong></p>
+                <p>Notre Lustre géant est fait pour les grandes Maisons. Avec une double forme et il saura vous
+                    satisfaire.</p>
+                <p><strong>Prix : 380 DHS</strong></p>
             </div>
             <div class="product-card">
                 <img src="images/lusters3.avif" alt="Cristal">
                 <h3>Cristal</h3>
-                <p>Une luster raffiné de qualité supérieure, parfait pour ceux qui cherchent une expérience  unique.</p>
-                <p><strong>Prix : 60 DHS</strong></p>
+                <p>Un Lustre raffiné de qualité supérieure, parfait pour ceux qui cherchent une expérience unique.</p>
+                <p><strong>Prix : 360 DHS</strong></p>
             </div>
         </div>
     </section>
 
-    <!-- Section des Boissons -->
+    <!-- Section des Promotions -->
     <section id="boissons-section">
         <h2>NOS PROMOTIONS</h2>
         <div class="product-grid">
             <div class="product-card">
                 <img src="images/lusters3.avif" alt="Cristal1">
                 <h3>Cristal1</h3>
-                <p>Une LUSTER magnifique pour  vos Salons. Parfaite pour équilibrer le Design.</p>
-                <p><strong>Prix : 10 DHS</strong></p>
+                <p>Un Lustre magnifique pour vos Salons. Parfaite pour équilibrer le Design.</p>
+                <p><strong>Prix : 310 DHS</strong></p>
             </div>
             <div class="product-card">
                 <img src="images/lusters4.avif" alt="Cristal4">
                 <h3>Cristal4</h3>
-                <p>Une luster légère et pétillante, idéale pour accompagner vos choix préférés.</p>
-                <p><strong>Prix : 15 DHS</strong></p>
+                <p>Un Lustre légère et pétillante, idéale pour accompagner vos choix préférés.</p>
+                <p><strong>Prix : 315 DHS</strong></p>
             </div>
             <div class="product-card">
                 <img src="images/lusters1.jpg" alt="Cristal3">
                 <h3>Cristal3</h3>
-                <p>Une luster énergisante pour vous donner un coup de boost pendant votre repos.</p>
-                <p><strong>Prix : 20 DHS</strong></p>
+                <p>Un Lustre énergisante pour vous donner un coup de boost pendant votre repos.</p>
+                <p><strong>Prix : 320 DHS</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Galerie -->
+    <section id="gallery-section">
+        <h2>Galerie Photos</h2>
+        <div class="gallery-container">
+            <!-- Petites vignettes -->
+            <div class="thumbnail-grid">
+                <img src="images/lusters1.jpg" alt="Classique" class="thumbnail" data-large="images/lusters1.jpg">
+                <img src="images/lusters2.avif" alt="Géant" class="thumbnail" data-large="images/lusters2.avif">
+                <img src="images/lusters3.avif" alt="Cristal" class="thumbnail" data-large="images/lusters3.avif">
+                <img src="images/lusters4.avif" alt="Spécial" class="thumbnail" data-large="images/lusters4.avif">
+                <!-- Ajoutez plus d'images ici -->
+            </div>
+
+            <!-- Grande image -->
+            <div class="large-image-container">
+                <img id="large-image" src="images/lusters1.jpg" alt="Grande Image">
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Paiement à la Livraison -->
+    <section id="payment-section">
+        <h2>Paiement à la Livraison</h2>
+        <div class="payment-info">
+            <div class="payment-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="payment-text">
+                <p>
+                    Nous offrons l'option de <strong>paiement à la livraison</strong> pour votre commodité.
+                    Vous pouvez payer en espèces ou par carte bancaire lorsque votre commande vous est livrée.
+                </p>
+                <p>
+                    <strong>Mentions légales :</strong>
+                    Conformément à la loi, le paiement à la livraison est soumis aux conditions générales de vente.
+                    Vous disposez d'un délai de rétractation de 14 jours à compter de la réception de votre commande.
+                </p>
             </div>
         </div>
     </section>
@@ -380,31 +180,31 @@
             <input type="tel" id="client-phone" required>
 
             <label for="client-address">Adresse :</label>
-<div class="address-input">
-    <textarea id="client-address" rows="3" required></textarea>
-    <button type="button" id="get-location-btn">
-        <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
-    </button>
-    <div id="loading-spinner" style="display: none;">
-        <i class="fas fa-spinner fa-spin"></i> Récupération de votre localisation...
-    </div>
-</div>
+            <div class="address-input">
+                <textarea id="client-address" rows="3" required></textarea>
+                <button type="button" id="get-location-btn">
+                    <i class="fas fa-map-marker-alt"></i> Utiliser ma localisation
+                </button>
+                <div id="loading-spinner" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Récupération de votre localisation...
+                </div>
+            </div>
 
             <label>ARRIVAGE :</label>
             <div id="tacos-categories">
                 <div>
                     <img src="images/lusters1.jpg" alt="Classique">
-                    <label>Classique - 50 DHS</label>
+                    <label>Classique - 350 DHS</label>
                     <input type="number" class="tacos-quantity" data-category="Classique" min="0" value="0">
                 </div>
                 <div>
                     <img src="images/lusters2.avif" alt="Géant">
-                    <label>Géant - 80 DHS</label>
+                    <label>Géant - 380 DHS</label>
                     <input type="number" class="tacos-quantity" data-category="Géant" min="0" value="0">
                 </div>
                 <div>
                     <img src="images/lusters3.avif" alt="Cristal">
-                    <label>Cristal - 60 DHS</label>
+                    <label>Cristal - 360 DHS</label>
                     <input type="number" class="tacos-quantity" data-category="Cristal" min="0" value="0">
                 </div>
             </div>
@@ -413,19 +213,25 @@
             <div id="boissons-list">
                 <div>
                     <img src="images/lusters3.avif" alt="Cristal1">
-                    <label>Cristal1 - 10 DHS</label>
+                    <label>Cristal1 - 310 DHS</label>
                     <input type="number" class="boisson-quantity" data-category="Cristal1" min="0" value="0">
                 </div>
                 <div>
                     <img src="images/lusters4.avif" alt="Cristal4">
-                    <label>Cristal4 - 15 DHS</label>
+                    <label>Cristal4 - 315 DHS</label>
                     <input type="number" class="boisson-quantity" data-category="Cristal4" min="0" value="0">
                 </div>
                 <div>
                     <img src="images/lusters1.jpg" alt="Cristal3">
-                    <label>Cristal3 - 20 DHS</label>
+                    <label>Cristal3 - 320 DHS</label>
                     <input type="number" class="boisson-quantity" data-category="Cristal3" min="0" value="0">
                 </div>
+            </div>
+
+            <!-- Dans le formulaire de commande, avant le bouton "Commander" -->
+            <div class="payment-option">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Paiement à la livraison disponible</span>
             </div>
 
             <div id="total-display">Total à payer : 0 DHS</div>
@@ -435,13 +241,20 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 GRAND LUSTER - Tous droits réservés.</p>
+        <!-- Dans le footer, après les liens de réseaux sociaux -->
+        <p>
+            <strong>Conditions de vente :</strong>
+            Le paiement à la livraison est soumis à l'acceptation des conditions générales de vente.
+            Pour plus d'informations, consultez notre <a href="#">politique de vente</a>.
+        </p>
+
         <p>
             Suivez-nous sur :
             <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i></a>
             <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
             <a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
         </p>
+        <p>&copy; 2025 GRAND LUSTRE - Tous droits réservés.</p>
     </footer>
 
     <!-- Modal -->
@@ -457,6 +270,54 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script type="module" src="./script.js"></script>
+    <script>
+        // Gestion de la galerie
+        document.addEventListener('DOMContentLoaded', () => {
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            const largeImage = document.getElementById('large-image');
+
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener('click', () => {
+                    const largeImageSrc = thumbnail.getAttribute('data-large');
+                    largeImage.setAttribute('src', largeImageSrc);
+                });
+            });
+        });
+
+        // Gestion du mode nocturne
+        const toggleTheme = () => {
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            const isDarkMode = body.classList.toggle('dark-mode');
+
+            // Mettre à jour l'icône et le texte du bouton
+            if (isDarkMode) {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i> ';
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i> ';
+            }
+
+            // Enregistrer le choix de l'utilisateur dans localStorage
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        };
+
+        // Appliquer le thème au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.getElementById('theme-toggle');
+
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i> ';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i> ';
+            }
+
+            // Ajouter un écouteur d'événements au bouton de bascule
+            themeToggle.addEventListener('click', toggleTheme);
+        });
+    </script>
 </body>
 
 </html>
